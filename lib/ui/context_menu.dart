@@ -11,7 +11,7 @@ class AppContextMenu<T> extends StatelessWidget {
     return GestureDetector(
       onSecondaryTapDown: (details) async {
         // show at tap position
-        final selected = await showMenu<T>(
+        await showMenu<T>(
           context: context,
           position: RelativeRect.fromLTRB(details.globalPosition.dx, details.globalPosition.dy, details.globalPosition.dx, details.globalPosition.dy),
           items: items,
