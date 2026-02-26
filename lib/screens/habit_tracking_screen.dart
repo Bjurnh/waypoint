@@ -281,7 +281,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                             Icon(
                               Icons.trending_up,
                               size: 48,
-                              color: AppColors.mutedForeground.withOpacity(0.5),
+                              color: AppColors.mutedForeground.withValues(alpha: 0.5),
                             ),
                             const SizedBox(height: Spacing.md),
                             Text(
@@ -289,7 +289,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                               style: TextStyle(
                                 fontSize: 16,
                                 color:
-                                    AppColors.mutedForeground.withOpacity(0.7),
+                                    AppColors.mutedForeground.withValues(alpha: 0.7),
                               ),
                             ),
                           ],
@@ -460,8 +460,8 @@ class _HabitCardState extends State<_HabitCard>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: widget.isCompletedToday
-                            ? color.withOpacity(0.3)
-                            : AppColors.mutedForeground.withOpacity(0.1),
+                            ? color.withValues(alpha:0.3)
+                            : AppColors.mutedForeground.withValues(alpha:0.1),
                         border: Border.all(
                           color: widget.isCompletedToday
                               ? color
@@ -496,7 +496,7 @@ class _HabitCardState extends State<_HabitCard>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -538,8 +538,8 @@ class _HabitCardState extends State<_HabitCard>
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: weekData[d]
-                                    ? color.withOpacity(0.3)
-                                    : AppColors.mutedForeground.withOpacity(0.1),
+                                    ? color.withValues(alpha:0.3)
+                                    : AppColors.mutedForeground.withValues(alpha:0.1),
                                 border: Border.all(
                                   color: weekData[d]
                                       ? color
@@ -607,7 +607,7 @@ class _HabitCardState extends State<_HabitCard>
                   value: completionRate,
                   minHeight: 6,
                   backgroundColor:
-                      AppColors.mutedForeground.withOpacity(0.2),
+                      AppColors.mutedForeground.withValues(alpha:0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                 ),
               ),

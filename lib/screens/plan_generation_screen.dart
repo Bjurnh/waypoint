@@ -64,8 +64,8 @@ class _PlanGenerationScreenState extends State<PlanGenerationScreen> {
         children: [
           GradientBackground(
             child: Container(),
-            startColor: Colors.blue.withOpacity(0.05),
-            midColor: Colors.purple.withOpacity(0.05),
+            startColor: Colors.blue.withValues(alpha: 0.05),
+            midColor: Colors.purple.withValues(alpha: 0.05),
             endColor: Colors.white,
           ),
           SingleChildScrollView(
@@ -80,7 +80,7 @@ class _PlanGenerationScreenState extends State<PlanGenerationScreen> {
               children: [
                 // Time Frame Selection
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -112,11 +112,11 @@ class _PlanGenerationScreenState extends State<PlanGenerationScreen> {
                               ),
                             ),
                             backgroundColor: Colors.transparent,
-                            selectedColor: AppColors.primary.withOpacity(0.8),
+                            selectedColor: AppColors.primary.withValues(alpha:0.8),
                             side: BorderSide(
                               color: isSelected
                                   ? AppColors.primary
-                                  : AppColors.border.withOpacity(0.4),
+                                  : AppColors.border.withValues(alpha:0.4),
                               width: 1.5,
                             ),
                           );
@@ -129,7 +129,7 @@ class _PlanGenerationScreenState extends State<PlanGenerationScreen> {
 
                 // Reading Style Selection
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -154,11 +154,11 @@ class _PlanGenerationScreenState extends State<PlanGenerationScreen> {
                               'Sequential',
                               style: TextStyle(fontWeight: FontWeight.w500),
                             ),
-                            selectedColor: AppColors.primary.withOpacity(0.8),
+                            selectedColor: AppColors.primary.withValues(alpha:0.8),
                             side: BorderSide(
                               color: _readingStyle == 'sequential'
                                   ? AppColors.primary
-                                  : AppColors.border.withOpacity(0.4),
+                                  : AppColors.border.withValues(alpha:0.4),
                               width: 1.5,
                             ),
                           ),
@@ -171,11 +171,11 @@ class _PlanGenerationScreenState extends State<PlanGenerationScreen> {
                               'Mixed',
                               style: TextStyle(fontWeight: FontWeight.w500),
                             ),
-                            selectedColor: AppColors.primary.withOpacity(0.8),
+                            selectedColor: AppColors.primary.withValues(alpha:0.8),
                             side: BorderSide(
                               color: _readingStyle == 'mixed'
                                   ? AppColors.primary
-                                  : AppColors.border.withOpacity(0.4),
+                                  : AppColors.border.withValues(alpha:0.4),
                               width: 1.5,
                             ),
                           ),
@@ -188,7 +188,7 @@ class _PlanGenerationScreenState extends State<PlanGenerationScreen> {
 
                 // Start Date Selection
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -228,7 +228,7 @@ class _PlanGenerationScreenState extends State<PlanGenerationScreen> {
 
                 // Daily Time Commitment
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

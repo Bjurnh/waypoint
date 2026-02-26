@@ -133,7 +133,7 @@ class ProgressDashboardScreen extends StatelessWidget {
                       value: progress / 100.0,
                       minHeight: 10,
                       backgroundColor: AppColors.mutedForeground
-                          .withOpacity(0.2),
+                          .withValues(alpha:0.2),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         AppColors.blueGradientStart,
                       ),
@@ -220,7 +220,7 @@ class ProgressDashboardScreen extends StatelessWidget {
                                 color: isActive
                                     ? AppColors.purpleGradientStart
                                     : AppColors.mutedForeground
-                                        .withOpacity(0.2),
+                                        .withValues(alpha:0.2),
                               ),
                               child: isActive
                                   ? const Center(
@@ -281,7 +281,7 @@ class ProgressDashboardScreen extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.pinkGradientStart
-                                .withOpacity(0.2),
+                                .withValues(alpha:0.2),
                             borderRadius:
                                 BorderRadius.circular(Spacing.radiusSm),
                           ),
@@ -384,9 +384,9 @@ class _PrayerStatusItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(Spacing.radiusLg),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

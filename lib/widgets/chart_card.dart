@@ -118,14 +118,14 @@ class _ChartCardState extends State<ChartCard>
           decoration: BoxDecoration(
             color: widget.backgroundColor ?? AppColors.card,
             border: Border.all(
-              color: widget.borderColor ?? AppColors.border.withOpacity(0.2),
+              color: widget.borderColor ?? AppColors.border.withValues(alpha:0.2),
               width: 1,
             ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: widget.showShadow
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withValues(alpha:0.08),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -192,7 +192,7 @@ class _ChartCardState extends State<ChartCard>
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     valueColor: AlwaysStoppedAnimation(
-                                      AppColors.primary.withOpacity(0.6),
+                                      AppColors.primary.withValues(alpha:0.6),
                                     ),
                                   ),
                                 ),
@@ -240,14 +240,14 @@ class ChartCardWithAction extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         border: Border.all(
-          color: AppColors.border.withOpacity(0.2),
+          color: AppColors.border.withValues(alpha:0.2),
           width: 1,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: showShadow
             ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha:0.08),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

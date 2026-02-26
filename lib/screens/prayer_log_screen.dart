@@ -3,7 +3,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../widgets/gradient_background.dart';
 import '../widgets/modern_appbar.dart';
-import '../widgets/search_filter_bar.dart';
 import '../widgets/gradient_card.dart';
 import '../models/prayer_entry.dart';
 import '../state/app_state.dart';
@@ -68,184 +67,151 @@ class _PrayerLogScreenState extends State<PrayerLogScreen> {
           title: 'Prayer Log',
           subtitle: '${filteredPrayers.length} prayers',
         ),
-        body: Column(
+        body: ListView(
+          padding: const EdgeInsets.all(Spacing.lg),
           children: [
-            // Search and Filter Bar
-            Padding(
-              padding: const EdgeInsets.all(Spacing.md),
-              child: SearchFilterBar(
-                onSearchChanged: (query) {
-                  setState(() {
-                    _searchQuery = query;
-                  });
-                },
-                onFilterSelected: (filter) {
-                  setState(() {
-                    _selectedFilter = filter;
-                  });
-                },
-                filters: const ['all', 'personal', 'family', 'friends', 'world'],
-                selectedFilter: _selectedFilter,
-              ),
-            ),
-
-            // Show Answered Toggle
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-              child: GradientCard(
-                flat: true,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.md,
-                  vertical: Spacing.sm,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Show Answered Only',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    Switch(
-                      value: _showAnswered,
-                      onChanged: (value) {
-                        setState(() {
-                          _showAnswered = value;
-                        });
-                      },
-                      activeColor: AppColors.pinkGradientStart,
-                    ),
-                  ],
+            GradientCard(
+              child: TextField(
+                onChanged: (q) => setState(() { _searchQuery = q; }),
+                decoration: InputDecoration(
+                  hintText: 'Search prayers',
+                  prefixIcon: const Icon(Icons.search),
+                  border: InputBorder.none,
                 ),
               ),
             ),
             const SizedBox(height: Spacing.md),
-
-            // Prayer List
-            Expanded(
-              child: filteredPrayers.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.favorite_border,
-                            size: 48,
-                            color: AppColors.mutedForeground.withOpacity(0.5),
-                          ),
-                          const SizedBox(height: Spacing.md),
-                          Text(
-                            'No prayers found',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color:
-                                  AppColors.mutedForeground.withOpacity(0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.md,
-                        vertical: Spacing.sm,
-                      ),
-                      itemCount: filteredPrayers.length,
-                      itemBuilder: (c, i) {
-                        final p = filteredPrayers[i];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: Spacing.md),
-                          child: GradientCard(
-                            onTap: () {
-                              if (widget.onViewPrayer != null) {
-                                widget.onViewPrayer!(p);
-                              } else {
-                                Provider.of<AppState>(context, listen: false)
-                                    .viewPrayer(p.id);
-                                Navigator.pushNamed(context, '/detail');
-                              }
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            p.title,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimary,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            p.category,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: AppColors.mutedForeground,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: p.isAnswered
-                                            ? AppColors.indigoGradientStart
-                                                .withOpacity(0.2)
-                                            : AppColors.pinkGradientStart
-                                                .withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        p.isAnswered ? 'Answered' : 'Active',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: p.isAnswered
-                                              ? AppColors.indigoGradientStart
-                                              : AppColors.pinkGradientStart,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )
-                            .animate(
-                              onPlay: (controller) => controller.repeat(),
-                            )
-                            .slideX(
-                              begin: -0.1,
-                              duration: 400.ms,
-                              curve: Curves.easeOut,
-                            )
-                            .fadeIn(
-                              duration: 400.ms,
-                              curve: Curves.easeOut,
-                            ),
-                        );
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: ['all', 'personal', 'family', 'friends', 'world']
+                    .map((filter) {
+                  final selected = _selectedFilter == filter;
+                  final label = filter[0].toUpperCase() + filter.substring(1);
+                  return Padding(
+                    padding: const EdgeInsets.only(right: Spacing.sm),
+                    child: ChoiceChip(
+                      label: Text(label),
+                      selected: selected,
+                      onSelected: (v) {
+                        if (v) setState(() => _selectedFilter = filter);
                       },
+                      selectedColor: AppColors.primary.withValues(alpha: 0.8),
+                      backgroundColor: Colors.white,
+                      labelStyle: TextStyle(
+                        color: selected ? Colors.white : AppColors.textPrimary,
+                      ),
                     ),
+                  );
+                }).toList(),
+              ),
             ),
+            const SizedBox(height: Spacing.md),
+            GradientCard(
+              flat: true,
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.md,
+                vertical: Spacing.sm,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Show Answered Only',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Switch(
+                    value: _showAnswered,
+                    onChanged: (v) { setState(() { _showAnswered = v; }); },
+                    activeThumbColor: AppColors.pinkGradientStart,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: Spacing.lg),
+            if (filteredPrayers.isEmpty)
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.favorite_border,
+                      size: 48,
+                      color: AppColors.mutedForeground.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: Spacing.md),
+                    Text(
+                      'No prayers found',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.mutedForeground.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else ...filteredPrayers.map((p) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: Spacing.md),
+                child: GradientCard(
+                  onTap: () {
+                    if (widget.onViewPrayer != null) {
+                      widget.onViewPrayer!(p);
+                    } else {
+                      Provider.of<AppState>(context, listen: false)
+                          .viewPrayer(p.id);
+                      Navigator.pushNamed(context, '/detail');
+                    }
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              p.category,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.mutedForeground,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          p.isAnswered ? Icons.check_circle : Icons.circle_outlined,
+                          color: p.isAnswered
+                              ? AppColors.greenGradientStart
+                              : AppColors.mutedForeground,
+                        ),
+                        onPressed: () {
+                          widget.onToggleAnswered?.call(p.id);
+                          Provider.of<AppState>(context, listen: false)
+                              .togglePrayerAnswered(p.id);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
           ],
         ),
         floatingActionButton: FloatingActionButton(

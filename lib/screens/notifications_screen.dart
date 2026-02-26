@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../theme/app_colors.dart';
 import '../utils/spacing.dart';
 import '../widgets/gradient_background.dart';
+import '../state/app_state.dart';
 
 class NotificationsScreen extends StatefulWidget {
   @override
@@ -51,6 +53,74 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     ];
   }
 
+  Future<void> _showReminderDialog(BuildContext context, [Reminder? existing]) async {
+    final isNew = existing == null;
+    String title = existing?.title ?? '';
+    TimeOfDay time = existing?.time ?? TimeOfDay(hour: 8, minute: 0);
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(isNew ? 'New Reminder' : 'Edit Reminder'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: const InputDecoration(labelText: 'Title'),
+                controller: TextEditingController(text: title),
+                onChanged: (v) => title = v,
+              ),
+              const SizedBox(height: Spacing.md),
+              Row(
+                children: [
+                  const Text('Time:'),
+                  const SizedBox(width: Spacing.sm),
+                  TextButton(
+                    child: Text(time.format(context)),
+                    onPressed: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: time,
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          time = picked;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel')),
+            ElevatedButton(
+                onPressed: () {
+                  if (title.trim().isEmpty) return;
+                  final app = Provider.of<AppState>(context, listen: false);
+                  if (isNew) {
+                    final id = DateTime.now().millisecondsSinceEpoch.toString();
+                    app.addReminder(Reminder(id: id, title: title, time: time, enabled: true));
+                  } else {
+                    final r = existing;
+                    r.title = title;
+                    r.time = time;
+                    app.updateReminder(r);
+                  }
+                  Navigator.pop(context);
+                },
+                child: Text(isNew ? 'Create' : 'Save')),
+          ],
+        );
+      },
+    );
+  }
+
+
   void _markAsRead(int index) {
     setState(() {
       _notifications[index].isRead = true;
@@ -79,48 +149,93 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         children: [
           GradientBackground(
             child: Container(),
-            startColor: Colors.pink.withOpacity(0.05),
-            midColor: Colors.purple.withOpacity(0.05),
+            startColor: Colors.pink.withValues(alpha:0.05),
+            midColor: Colors.purple.withValues(alpha:0.05),
             endColor: Colors.white,
           ),
-          _notifications.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          Consumer<AppState>(
+            builder: (context, app, _) {
+              final reminders = app.reminders;
+              return ListView(
+                padding: EdgeInsets.only(
+                  top: kToolbarHeight + Spacing.lg,
+                  left: Spacing.lg,
+                  right: Spacing.lg,
+                  bottom: Spacing.lg,
+                ),
+                children: [
+                  // Reminders header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.notifications_off_rounded,
-                        size: 64,
-                        color: AppColors.border.withOpacity(0.5),
-                      ),
-                      SizedBox(height: Spacing.lg),
-                      Text(
-                        'No Notifications',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                      Text('Your Reminders',
+                          style: Theme.of(context).textTheme.titleLarge),
+                      TextButton.icon(
+                        onPressed: () => _showReminderDialog(context),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add'),
                       ),
                     ],
                   ),
-                )
-              : ListView.separated(
-                  padding: EdgeInsets.only(
-                    top: kToolbarHeight + Spacing.lg,
-                    left: Spacing.lg,
-                    right: Spacing.lg,
-                    bottom: Spacing.lg,
-                  ),
-                  itemCount: _notifications.length,
-                  separatorBuilder: (_, __) => SizedBox(height: Spacing.md),
-                  itemBuilder: (context, index) {
-                    final notification = _notifications[index];
-                    return _NotificationCard(
-                      notification: notification,
-                      onMarkAsRead: () => _markAsRead(index),
-                      onDelete: () => _deleteNotification(index),
+                  ...reminders.map((r) {
+                    return ListTile(
+                      title: Text(r.title),
+                      subtitle: Text(r.time.format(context)),
+                      trailing: Switch(
+                        value: r.enabled,
+                        onChanged: (v) {
+                          setState(() {
+                            r.enabled = v;
+                          });
+                          app.updateReminder(r);
+                        },
+                      ),
+                      onTap: () => _showReminderDialog(context, r),
                     );
-                  },
-                ),
+                  }).toList(),
+                  const Divider(),
+                  // existing notifications
+                  if (_notifications.isEmpty)
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.notifications_off_rounded,
+                            size: 64,
+                            color: AppColors.border.withValues(alpha:0.5),
+                          ),
+                          SizedBox(height: Spacing.lg),
+                          Text(
+                            'No Notifications',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    ...List.generate(_notifications.length, (index) {
+                      final notification = _notifications[index];
+                      return Column(
+                        children: [
+                          _NotificationCard(
+                            notification: notification,
+                            onMarkAsRead: () => _markAsRead(index),
+                            onDelete: () => _deleteNotification(index),
+                          ),
+                          SizedBox(height: Spacing.md),
+                        ],
+                      );
+                    }),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
@@ -198,17 +313,17 @@ class _NotificationCard extends StatelessWidget {
       onTap: notification.isRead ? null : onMarkAsRead,
       child: Container(
         decoration: BoxDecoration(
-          color: notification.isRead ? AppColors.card : color.withOpacity(0.05),
+          color: notification.isRead ? AppColors.card : color.withValues(alpha:0.05),
           border: Border.all(
             color: notification.isRead
-                ? AppColors.border.withOpacity(0.2)
-                : color.withOpacity(0.3),
+                ? AppColors.border.withValues(alpha:0.2)
+                : color.withValues(alpha:0.3),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha:0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -227,7 +342,7 @@ class _NotificationCard extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       color,
-                      color.withOpacity(0.7),
+                      color.withValues(alpha:0.7),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,

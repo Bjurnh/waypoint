@@ -98,7 +98,7 @@ class ReadingProgressChart extends StatelessWidget {
                 Container(
                   width: 1,
                   height: 40,
-                  color: AppColors.border.withOpacity(0.2),
+                  color: AppColors.border.withValues(alpha:0.2),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +148,7 @@ class ReadingProgressChart extends StatelessWidget {
         drawVerticalLine: false,
         horizontalInterval: maxY / 4,
         getDrawingHorizontalLine: (value) => FlLine(
-          color: AppColors.border.withOpacity(0.2),
+          color: AppColors.border.withValues(alpha:0.2),
           strokeWidth: 0.5,
           dashArray: [5, 5],
         ),
@@ -197,8 +197,8 @@ class ReadingProgressChart extends StatelessWidget {
             show: true,
             gradient: LinearGradient(
               colors: [
-                AppColors.primary.withOpacity(0.4),
-                AppColors.primary.withOpacity(0.0),
+                AppColors.primary.withValues(alpha:0.4),
+                AppColors.primary.withValues(alpha:0.0),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -291,13 +291,13 @@ class ReadingProgressIndicator extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.card,
           border: Border.all(
-            color: AppColors.border.withOpacity(0.2),
+            color: AppColors.border.withValues(alpha:0.2),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha:0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -325,7 +325,7 @@ class ReadingProgressIndicator extends StatelessWidget {
                       vertical: Spacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: displayColor.withOpacity(0.1),
+                      color: displayColor.withValues(alpha:0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(

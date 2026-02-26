@@ -68,8 +68,8 @@ class ChartStyles {
             show: showGradient,
             gradient: LinearGradient(
               colors: [
-                gradientColor.withOpacity(0.4),
-                gradientColor.withOpacity(0.0),
+                gradientColor.withValues(alpha:0.4),
+                gradientColor.withValues(alpha:0.0),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -142,7 +142,7 @@ class ChartStyles {
   /// Horizontal grid line painter
   static FlLine _drawHorizontalLine(double value) {
     return FlLine(
-      color: AppColors.border.withOpacity(0.3),
+      color: AppColors.border.withValues(alpha:0.3),
       strokeWidth: gridLineWidth,
       dashArray: [5, 5],
     );

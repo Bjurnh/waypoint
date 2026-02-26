@@ -36,8 +36,8 @@ class ProfileScreen extends StatelessWidget {
         children: [
           GradientBackground(
             child: Container(),
-            startColor: Colors.blue.withOpacity(0.05),
-            midColor: Colors.indigo.withOpacity(0.05),
+            startColor: Colors.blue.withValues(alpha:0.05),
+            midColor: Colors.indigo.withValues(alpha:0.05),
             endColor: Colors.white,
           ),
           SingleChildScrollView(
@@ -52,7 +52,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 // Profile Header
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -64,7 +64,7 @@ class ProfileScreen extends StatelessWidget {
                           gradient: LinearGradient(
                             colors: [
                               AppColors.primary,
-                              AppColors.primary.withOpacity(0.7),
+                              AppColors.primary.withValues(alpha:0.7),
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -76,7 +76,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha:0.1),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -121,7 +121,7 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: GradientCard(
-                        borderColor: AppColors.border.withOpacity(0.2),
+                        borderColor: AppColors.border.withValues(alpha:0.2),
                         child: Column(
                           children: [
                             Icon(
@@ -150,7 +150,7 @@ class ProfileScreen extends StatelessWidget {
                     SizedBox(width: Spacing.md),
                     Expanded(
                       child: GradientCard(
-                        borderColor: AppColors.border.withOpacity(0.2),
+                        borderColor: AppColors.border.withValues(alpha:0.2),
                         child: Column(
                           children: [
                             Icon(
@@ -179,7 +179,7 @@ class ProfileScreen extends StatelessWidget {
                     SizedBox(width: Spacing.md),
                     Expanded(
                       child: GradientCard(
-                        borderColor: AppColors.border.withOpacity(0.2),
+                        borderColor: AppColors.border.withValues(alpha:0.2),
                         child: Column(
                           children: [
                             Icon(
@@ -219,7 +219,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 SizedBox(height: Spacing.md),
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     children: [
                       _SettingsTile(
@@ -268,7 +268,7 @@ class ProfileScreen extends StatelessWidget {
 
                 // About
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -334,7 +334,7 @@ class ProfileScreen extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: Spacing.md),
                     side: BorderSide(
-                      color: AppColors.destructive.withOpacity(0.5),
+                      color: AppColors.destructive.withValues(alpha:0.5),
                       width: 1,
                     ),
                   ),
@@ -390,7 +390,7 @@ class _SettingsTile extends StatelessWidget {
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 16,
-              color: AppColors.border.withOpacity(0.5),
+              color: AppColors.border.withValues(alpha:0.5),
             ),
           ],
         ),

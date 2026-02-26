@@ -132,11 +132,11 @@ class _SyncStatusBarState extends State<SyncStatusBar>
   Color get _backgroundColor {
     switch (widget.state) {
       case SyncState.syncing:
-        return const Color(0xFF60A5FA).withOpacity(0.1);
+        return const Color(0xFF60A5FA).withValues(alpha:0.1);
       case SyncState.synced:
-        return const Color(0xFF10B981).withOpacity(0.1);
+        return const Color(0xFF10B981).withValues(alpha:0.1);
       case SyncState.failed:
-        return const Color(0xFFEF4444).withOpacity(0.1);
+        return const Color(0xFFEF4444).withValues(alpha:0.1);
     }
   }
 

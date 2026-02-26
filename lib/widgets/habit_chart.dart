@@ -55,13 +55,13 @@ class HabitChart extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.card,
           border: Border.all(
-            color: AppColors.border.withOpacity(0.2),
+            color: AppColors.border.withValues(alpha:0.2),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha:0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -87,7 +87,7 @@ class HabitChart extends StatelessWidget {
                               gradient: LinearGradient(
                                 colors: [
                                   color,
-                                  color.withOpacity(0.7),
+                                  color.withValues(alpha:0.7),
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
@@ -136,10 +136,10 @@ class HabitChart extends StatelessWidget {
                       vertical: Spacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha:0.1),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
-                        color: color.withOpacity(0.3),
+                        color: color.withValues(alpha:0.3),
                         width: 1,
                       ),
                     ),
@@ -183,7 +183,7 @@ class HabitChart extends StatelessWidget {
                             border: Border.all(
                               color: completed
                                   ? color
-                                  : AppColors.border.withOpacity(0.3),
+                                  : AppColors.border.withValues(alpha:0.3),
                               width: 1.5,
                             ),
                             borderRadius: BorderRadius.circular(50),
@@ -280,13 +280,13 @@ class HabitChartCompact extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.card,
           border: Border.all(
-            color: AppColors.border.withOpacity(0.2),
+            color: AppColors.border.withValues(alpha:0.2),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha:0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -335,7 +335,7 @@ class HabitChartCompact extends StatelessWidget {
                       border: Border.all(
                         color: completed
                             ? color
-                            : AppColors.border.withOpacity(0.2),
+                            : AppColors.border.withValues(alpha:0.2),
                         width: 0.5,
                       ),
                       borderRadius: BorderRadius.circular(50),

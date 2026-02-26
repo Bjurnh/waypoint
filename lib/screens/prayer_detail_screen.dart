@@ -85,8 +85,8 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
         children: [
           GradientBackground(
             child: Container(),
-            startColor: Colors.pink.withOpacity(0.05),
-            midColor: Colors.purple.withOpacity(0.05),
+            startColor: Colors.pink.withValues(alpha:0.05),
+            midColor: Colors.purple.withValues(alpha: 0.05),
             endColor: Colors.white,
           ),
           SingleChildScrollView(
@@ -101,7 +101,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
               children: [
                 // Prayer Title and Status
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -125,10 +125,10 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                                 vertical: Spacing.xs,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
+                                color: Colors.green.withValues(alpha:0.1),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: Colors.green.withOpacity(0.3),
+                                  color: Colors.green.withValues(alpha:0.3),
                                   width: 1,
                                 ),
                               ),
@@ -167,7 +167,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
 
                 // Prayer Content
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -204,7 +204,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
 
                 // Answer Tracking
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -242,10 +242,10 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                         Container(
                           padding: EdgeInsets.all(Spacing.md),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.05),
+                            color: Colors.green.withValues(alpha:0.05),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.green.withOpacity(0.2),
+                              color: Colors.green.withValues(alpha:0.2),
                               width: 1,
                             ),
                           ),

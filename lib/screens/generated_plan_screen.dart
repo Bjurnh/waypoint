@@ -280,8 +280,8 @@ class _ReadingCardState extends State<_ReadingCard>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: widget.reading.completed
-                      ? AppColors.greenGradientStart.withOpacity(0.2)
-                      : AppColors.mutedForeground.withOpacity(0.1),
+                      ? AppColors.greenGradientStart.withValues(alpha: 0.2)
+                      : AppColors.mutedForeground.withValues(alpha: 0.1),
                   border: Border.all(
                     color: widget.reading.completed
                         ? AppColors.greenGradientStart

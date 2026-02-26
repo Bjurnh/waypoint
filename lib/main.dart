@@ -13,20 +13,68 @@ import 'screens/habit_tracking_screen.dart';
 import 'state/app_state.dart';
 import 'screens/prayer_detail_screen.dart';
 import 'theme/app_theme.dart';
+import 'widgets/bottom_navigation_shell.dart';
+import 'services/notification_service.dart';
+import 'widgets/splash_screen.dart';
 
-void main() => runApp(ChangeNotifierProvider(create: (_) => AppState(), child: WaypointApp()));
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize notifications in background (don't await - start it but don't block)
+  NotificationService.initialize();
 
-class WaypointApp extends StatelessWidget {
+  runApp(ChangeNotifierProvider(create: (_) => AppState(), child: const WaypointApp()));
+}
+
+class WaypointApp extends StatefulWidget {
+  const WaypointApp({super.key});
+
+  @override
+  State<WaypointApp> createState() => _WaypointAppState();
+}
+
+class _WaypointAppState extends State<WaypointApp> {
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    // Initialize storage and app state in background
+    final appState = Provider.of<AppState>(context, listen: false);
+    await appState.initialize();
+    
+    if (mounted) {
+      setState(() {
+        _isInitialized = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return MaterialApp(
+        title: 'Waypoint',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        home: SplashScreen(
+          onInitialized: _initializeApp,
+        ),
+      );
+    }
+
     return MaterialApp(
       title: 'Waypoint',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      initialRoute: '/',
+      home: const BottomNavigationShell(),
       routes: {
-        '/': (context) => HomeScreen(),
         '/add': (context) => AddPrayerScreen(),
         '/log': (context) => PrayerLogScreen(),
         '/profile': (context) => ProfileScreen(),

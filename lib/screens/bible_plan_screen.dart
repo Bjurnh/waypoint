@@ -6,6 +6,7 @@ import '../utils/spacing.dart';
 import '../widgets/gradient_background.dart';
 import '../widgets/gradient_card.dart';
 import '../widgets/reading_progress_chart.dart';
+import '../widgets/summary_card.dart';
 
 class BiblePlanScreen extends StatefulWidget {
   final PlanConfig? config;
@@ -24,8 +25,16 @@ class _BiblePlanScreenState extends State<BiblePlanScreen> {
   @override
   void initState() {
     super.initState();
-    _readings = widget.readings ?? List.generate(30, (i) => DayReading(day: i + 1, date: 'Day ${i + 1}', chapters: ['Genesis ${i + 1}']));
     _config = widget.config ?? PlanConfig(timeFrame: 30, startDate: DateTime.now(), dailyMinutes: 15, readingStyle: 'sequential');
+
+    // If readings weren't provided, generate a placeholder schedule using the plan start date
+    _readings = widget.readings ?? List.generate(_config.timeFrame, (i) {
+      final date = _config.startDate.add(Duration(days: i));
+      // Create a few simple chapter placeholders for each day
+      final base = i * 3 + 1;
+      final chapters = List.generate(3, (j) => 'Chapter ${base + j}');
+      return DayReading(day: i + 1, date: date.toIso8601String().split('T').first, chapters: chapters);
+    });
   }
 
   @override
@@ -44,8 +53,8 @@ class _BiblePlanScreenState extends State<BiblePlanScreen> {
         children: [
           GradientBackground(
             child: Container(),
-            startColor: Colors.indigo.withOpacity(0.05),
-            midColor: Colors.blue.withOpacity(0.05),
+            startColor: Colors.indigo.withValues(alpha: 0.05),
+            midColor: Colors.blue.withValues(alpha: 0.05),
             endColor: Colors.white,
           ),
           SingleChildScrollView(
@@ -58,91 +67,51 @@ class _BiblePlanScreenState extends State<BiblePlanScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Plan Info
+                // Top summary row (Days / Streak / Completed)
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha: 0.2),
+                  padding: EdgeInsets.all(Spacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${_config.timeFrame}-Day Plan',
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.foreground,
-                                  ),
-                                ),
-                                SizedBox(height: Spacing.xs),
-                                Text(
-                                  'Started ${_config.startDate.toString().split(' ')[0]}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
+                            child: SummaryCard.bibleReading(
+                              value: '${_readings.length}',
+                              label: 'Days',
+                              onTap: null,
                             ),
                           ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: Spacing.md,
-                              vertical: Spacing.sm,
+                          SizedBox(width: Spacing.md),
+                          Expanded(
+                            child: SummaryCard.streak(
+                              value: '0',
+                              label: 'Streak',
                             ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: AppColors.primary.withOpacity(0.2),
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              '$completionPercentage%',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
+                          ),
+                          SizedBox(width: Spacing.md),
+                          Expanded(
+                            child: SummaryCard.habits(
+                              value: '${completedDays}',
+                              label: 'Completed',
                             ),
                           ),
                         ],
                       ),
                       SizedBox(height: Spacing.md),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Overall Progress',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              Text(
-                                '$completedDays/${_readings.length} days',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.foreground,
-                                ),
-                              ),
+                              Text('${_config.timeFrame}-Day Plan', style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+                              SizedBox(height: Spacing.xs),
+                              Text('Started ${_config.startDate.toIso8601String().split('T').first}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
                             ],
                           ),
-                          SizedBox(height: 6),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: completedDays / _readings.length,
-                              minHeight: 8,
-                              backgroundColor: AppColors.inputBackground,
-                              valueColor: const AlwaysStoppedAnimation(AppColors.primary),
-                            ),
-                          ),
+                          Text('$completionPercentage%', style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
                         ],
                       ),
                     ],
@@ -155,7 +124,7 @@ class _BiblePlanScreenState extends State<BiblePlanScreen> {
                   children: [
                     Expanded(
                       child: GradientCard(
-                        borderColor: AppColors.border.withOpacity(0.2),
+                        borderColor: AppColors.border.withValues(alpha:0.2),
                         child: Column(
                           children: [
                             Text(
@@ -187,7 +156,7 @@ class _BiblePlanScreenState extends State<BiblePlanScreen> {
                     SizedBox(width: Spacing.md),
                     Expanded(
                       child: GradientCard(
-                        borderColor: AppColors.border.withOpacity(0.2),
+                        borderColor: AppColors.border.withValues(alpha:0.2),
                         child: Column(
                           children: [
                             Text(
@@ -251,6 +220,115 @@ class _BiblePlanScreenState extends State<BiblePlanScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                ),
+                SizedBox(height: Spacing.lg),
+
+                // Reading Schedule header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Reading Schedule', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
+                      decoration: BoxDecoration(
+                        color: AppColors.inputBackground,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(_config.readingStyle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+                    ),
+                  ],
+                ),
+                SizedBox(height: Spacing.md),
+
+                // Schedule list
+                Column(
+                  children: _readings.map((day) {
+                    final dayDate = DateTime.tryParse(day.date) ?? DateTime.now();
+                    final available = !dayDate.isAfter(DateTime.now());
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: GradientCard.plan(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // circle indicator
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.border),
+                                  ),
+                                ),
+                                SizedBox(width: Spacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Day ${day.day}', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                                      SizedBox(height: Spacing.xs),
+                                      Text(day.date, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: Spacing.md),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+                                  decoration: BoxDecoration(
+                                    color: day.completed ? AppColors.primary.withValues(alpha: 0.12) : AppColors.inputBackground,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(day.completed ? 'Completed' : 'Not Completed', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: Spacing.md),
+                            // Chapters
+                            Column(
+                              children: day.chapters.map((c) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.inputBackground,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.menu_book, color: AppColors.primary, size: 18),
+                                      SizedBox(width: Spacing.md),
+                                      Expanded(child: Text(c, style: Theme.of(context).textTheme.bodyMedium)),
+                                    ],
+                                  ),
+                                ),
+                              )).toList(),
+                            ),
+                            SizedBox(height: Spacing.md),
+                            // action area
+                            available
+                              ? FilledButton(
+                                  onPressed: day.completed ? null : () { setState(() { day.completed = true; }); },
+                                  style: FilledButton.styleFrom(backgroundColor: AppColors.primary, padding: EdgeInsets.symmetric(vertical: Spacing.md)),
+                                  child: Text(day.completed ? 'Completed' : 'Mark as Complete', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white)),
+                                )
+                              : Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(vertical: Spacing.md),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.inputBackground,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(child: Text('Available on ${day.date}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary))),
+                                ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),

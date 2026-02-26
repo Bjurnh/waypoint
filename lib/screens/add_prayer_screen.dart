@@ -100,8 +100,8 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
         children: [
           GradientBackground(
             child: Container(),
-            startColor: Colors.pink.withOpacity(0.05),
-            midColor: Colors.purple.withOpacity(0.05),
+            startColor: Colors.pink.withValues(alpha: 0.05),
+            midColor: Colors.purple.withValues(alpha: 0.05),
             endColor: Colors.white,
           ),
           SingleChildScrollView(
@@ -116,7 +116,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
               children: [
                 // Prayer Title
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -156,7 +156,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
 
                 // Category Selection
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -196,11 +196,11 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                               ),
                             ),
                             backgroundColor: Colors.transparent,
-                            selectedColor: color.withOpacity(0.8),
+                            selectedColor: color.withValues(alpha: 0.8),
                             side: BorderSide(
                               color: isSelected
                                   ? color
-                                  : AppColors.border.withOpacity(0.4),
+                                  : AppColors.border.withValues(alpha: 0.4),
                               width: 1.5,
                             ),
                           );
@@ -213,7 +213,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
 
                 // Prayer Description/Details
                 GradientCard(
-                  borderColor: AppColors.border.withOpacity(0.2),
+                  borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

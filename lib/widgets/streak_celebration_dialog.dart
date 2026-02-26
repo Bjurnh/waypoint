@@ -149,7 +149,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Spacing.radiusXxxl),
+        borderRadius: BorderRadius.circular(Spacing.radiusXl),
       ),
       child: ScaleTransition(
         scale: _scaleAnimation,
@@ -158,17 +158,17 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(Spacing.radiusXxxl),
+              borderRadius: BorderRadius.circular(Spacing.radiusXl),
               boxShadow: [
                 BoxShadow(
-                  color: _accentColor.withOpacity(0.3),
+                  color: _accentColor.withValues(alpha:0.3),
                   blurRadius: 30,
                   offset: const Offset(0, 10),
                 ),
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(Spacing.lg),
+                      padding: EdgeInsets.all(Spacing.lg),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -184,14 +184,14 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
                         gradient: LinearGradient(
                           colors: [
                             _accentColor,
-                            _accentColor.withOpacity(0.7),
+                            _accentColor.withValues(alpha:0.7),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: _accentColor.withOpacity(0.3),
+                            color: _accentColor.withValues(alpha:0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -205,7 +205,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.lg),
+                          SizedBox(height: Spacing.lg),
 
                   // Title
                   Text(
@@ -217,7 +217,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
                         ),
                   ),
 
-                  const SizedBox(height: Spacing.md),
+                          SizedBox(height: Spacing.md),
 
                   // Message
                   Text(
@@ -229,17 +229,17 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
                         ),
                   ),
 
-                  const SizedBox(height: Spacing.lg),
+                          SizedBox(height: Spacing.lg),
 
                   // Streak counter (if relevant)
-                  if (widget.type == AchievementType.streak)
-                    Container(
-                      padding: const EdgeInsets.all(Spacing.md),
+                    if (widget.type == AchievementType.streak)
+                            Container(
+                              padding: EdgeInsets.all(Spacing.md),
                       decoration: BoxDecoration(
-                        color: _accentColor.withOpacity(0.1),
+                        color: _accentColor.withValues(alpha:0.1),
                         borderRadius: BorderRadius.circular(Spacing.radiusLg),
                         border: Border.all(
-                          color: _accentColor.withOpacity(0.3),
+                          color: _accentColor.withValues(alpha:0.3),
                         ),
                       ),
                       child: Row(
@@ -247,7 +247,7 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
                         children: [
                           Icon(Icons.calendar_today,
                               color: _accentColor, size: 20),
-                          const SizedBox(width: Spacing.sm),
+                                  SizedBox(width: Spacing.sm),
                           Text(
                             '${widget.streak} day streak',
                             style: TextStyle(
@@ -260,17 +260,17 @@ class _StreakCelebrationDialogState extends State<StreakCelebrationDialog>
                       ),
                     ),
 
-                  const SizedBox(height: Spacing.lg),
+                          SizedBox(height: Spacing.lg),
 
                   // Close button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _accentColor,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: Spacing.md,
-                        ),
+                                backgroundColor: _accentColor,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: Spacing.md,
+                                ),
                         shape: RoundedRectangleBorder(
                           borderRadius:
                               BorderRadius.circular(Spacing.radiusLg),
