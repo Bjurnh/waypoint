@@ -12,6 +12,8 @@ workflows:
       - name: Build iOS IPA
         script: |
           flutter build ipa --release
+          - mkdir -p build/ios/ipa
+          - mv build/ios/ipa/Runner.app.zip build/ios/ipa/Waypoint.ipa
     artifacts:
       - build/ios/ipa/*.ipa
     
