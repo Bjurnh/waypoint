@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/gradient_background.dart';
-import '../widgets/streak_badge.dart';
 import '../widgets/daily_verse_card.dart';
 import '../widgets/feature_card.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../utils/spacing.dart';
+import '../utils/daily_verses.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final app = Provider.of<AppState>(context);
-    
+
     return GradientBackground.home(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -26,7 +26,8 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(Spacing.md),
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.md, vertical: Spacing.sm),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.95),
                     borderRadius: BorderRadius.circular(20),
@@ -52,7 +53,8 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         body: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
+          padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.lg, vertical: Spacing.md),
           children: [
             // Good Morning Greeting
             const Column(
@@ -80,8 +82,8 @@ class HomeScreen extends StatelessWidget {
 
             // Daily Verse Card
             DailyVerseCard(
-              verse: 'For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future.',
-              reference: 'Jeremiah 29:11',
+              verse: DailyVerses.getTodayVerse().verse,
+              reference: DailyVerses.getTodayVerse().reference,
               onBookmarkTap: () => Navigator.pushNamed(context, '/plan'),
             ),
             const SizedBox(height: Spacing.lg),
@@ -166,7 +168,7 @@ class HomeScreen extends StatelessWidget {
               description: 'Continue your daily reading',
               gradientStart: AppColors.blueGradientStart,
               gradientEnd: AppColors.blueGradientEnd,
-              onTap: () => Navigator.pushNamed(context, '/bible-plan'),
+              onTap: () => Navigator.pushNamed(context, '/plan'),
             ),
             const SizedBox(height: Spacing.md),
 
@@ -176,7 +178,7 @@ class HomeScreen extends StatelessWidget {
               description: '${app.prayers.length} prayers waiting for you',
               gradientStart: AppColors.pinkGradientStart,
               gradientEnd: AppColors.pinkGradientEnd,
-              onTap: () => Navigator.pushNamed(context, '/prayer-log'),
+              onTap: () => Navigator.pushNamed(context, '/prayer log'),
             ),
             const SizedBox(height: Spacing.md),
 

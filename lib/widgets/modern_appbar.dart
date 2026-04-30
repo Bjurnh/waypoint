@@ -147,6 +147,7 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
+      automaticallyImplyLeading: false,  // Hide automatic back button
       leading: showBackButton
           ? IconButton(
               icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),

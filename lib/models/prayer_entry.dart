@@ -1,16 +1,43 @@
-class PrayerEntry {
-  final String id;
-  final String title;
-  final String? description;
-  final String category;
-  final DateTime dateAdded;
-  final bool isAnswered;
-  final DateTime? answeredDate;
+import 'package:hive/hive.dart';
 
-  PrayerEntry({required this.id, required this.title, this.description, required this.category, required this.dateAdded, this.isAnswered = false, this.answeredDate});
+part 'prayer_entry.g.dart';
 
-  /// Convert object to JSON map for persistence
-  Map<String, dynamic> toJson() {
+@HiveType(typeId: 2)
+class PrayerEntry extends HiveObject {
+  @HiveField(0)
+  String id;
+
+  @HiveField(1)
+  String title;
+
+  @HiveField(2)
+  String? description;
+
+  // category remains optional for legacy UI
+  @HiveField(3)
+  String? category;
+
+  @HiveField(4)
+  DateTime dateAdded;
+
+  @HiveField(5)
+  bool isAnswered;
+
+  @HiveField(6)
+  DateTime? answeredDate;
+
+  PrayerEntry({
+    required this.id,
+    required this.title,
+    this.description,
+    this.category,
+    required this.dateAdded,
+    this.isAnswered = false,
+    this.answeredDate,
+  });
+
+  /// Convert object to JSON map (still available for debugging or network work)
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'title': title,
@@ -22,17 +49,16 @@ class PrayerEntry {
     };
   }
 
-  /// Create object from JSON map
-  factory PrayerEntry.fromJson(Map<String, dynamic> json) {
+  factory PrayerEntry.fromMap(Map<String, dynamic> m) {
     return PrayerEntry(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String?,
-      category: json['category'] as String,
-      dateAdded: DateTime.parse(json['dateAdded'] as String),
-      isAnswered: json['isAnswered'] as bool? ?? false,
-      answeredDate: json['answeredDate'] != null
-          ? DateTime.parse(json['answeredDate'] as String)
+      id: m['id'] as String,
+      title: m['title'] as String,
+      description: m['description'] as String?,
+      category: m['category'] as String?,
+      dateAdded: DateTime.parse(m['dateAdded'] as String),
+      isAnswered: m['isAnswered'] as bool? ?? false,
+      answeredDate: m['answeredDate'] != null
+          ? DateTime.parse(m['answeredDate'] as String)
           : null,
     );
   }

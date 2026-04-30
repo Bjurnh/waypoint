@@ -84,13 +84,13 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
       body: Stack(
         children: [
           GradientBackground(
-            child: Container(),
             startColor: Colors.pink.withValues(alpha:0.05),
             midColor: Colors.purple.withValues(alpha: 0.05),
             endColor: Colors.white,
+            child: Container(),
           ),
           SingleChildScrollView(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               top: kToolbarHeight + Spacing.lg,
               left: Spacing.lg,
               right: Spacing.lg,
@@ -117,10 +117,10 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                               ),
                             ),
                           ),
-                          SizedBox(width: Spacing.md),
+                          const SizedBox(width: Spacing.md),
                           if (_isAnswered)
                             Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: Spacing.sm,
                                 vertical: Spacing.xs,
                               ),
@@ -135,12 +135,12 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.check_circle_rounded,
                                     size: 14,
                                     color: Colors.green,
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Answered',
                                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -153,7 +153,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                             ),
                         ],
                       ),
-                      SizedBox(height: Spacing.md),
+                      const SizedBox(height: Spacing.md),
                       Text(
                         'Created $createdTimeAgo',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -163,7 +163,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: Spacing.lg),
+                const SizedBox(height: Spacing.lg),
 
                 // Prayer Content
                 GradientCard(
@@ -178,9 +178,9 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                           color: AppColors.foreground,
                         ),
                       ),
-                      SizedBox(height: Spacing.md),
+                      const SizedBox(height: Spacing.md),
                       Container(
-                        padding: EdgeInsets.all(Spacing.md),
+                        padding: const EdgeInsets.all(Spacing.md),
                         decoration: BoxDecoration(
                           color: AppColors.inputBackground,
                           borderRadius: BorderRadius.circular(8),
@@ -200,7 +200,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: Spacing.lg),
+                const SizedBox(height: Spacing.lg),
 
                 // Answer Tracking
                 GradientCard(
@@ -221,7 +221,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                                   color: AppColors.foreground,
                                 ),
                               ),
-                              SizedBox(height: Spacing.xs),
+                              const SizedBox(height: Spacing.xs),
                               Text(
                                 _isAnswered ? 'Mark as unanswered' : 'Mark as answered',
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -233,14 +233,14 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                           Switch(
                             value: _isAnswered,
                             onChanged: (_) => _toggleAnswered(),
-                            activeColor: Colors.green,
+                            activeThumbColor: Colors.green,
                           ),
                         ],
                       ),
                       if (_isAnswered && answeredTimeAgo != null) ...[
-                        SizedBox(height: Spacing.md),
+                        const SizedBox(height: Spacing.md),
                         Container(
-                          padding: EdgeInsets.all(Spacing.md),
+                          padding: const EdgeInsets.all(Spacing.md),
                           decoration: BoxDecoration(
                             color: Colors.green.withValues(alpha:0.05),
                             borderRadius: BorderRadius.circular(8),
@@ -251,12 +251,12 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.check_circle_rounded,
                                 size: 20,
                                 color: Colors.green,
                               ),
-                              SizedBox(width: Spacing.md),
+                              const SizedBox(width: Spacing.md),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,7 +284,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: Spacing.lg),
+                const SizedBox(height: Spacing.lg),
 
                 // Action Buttons
                 FilledButton(
@@ -296,7 +296,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                     );
                   },
                   style: FilledButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: Spacing.md),
+                    padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                     backgroundColor: AppColors.primary,
                   ),
                   child: Text(

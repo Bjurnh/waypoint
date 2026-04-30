@@ -7,6 +7,8 @@ import '../widgets/gradient_background.dart';
 import '../widgets/gradient_card.dart';
 
 class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final app = Provider.of<AppState>(context);
@@ -18,7 +20,7 @@ class ProfileScreen extends StatelessWidget {
         leading: BackButton(onPressed: () => Navigator.maybePop(context)),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: Spacing.md),
+            padding: const EdgeInsets.only(right: Spacing.md),
             child: Center(
               child: IconButton(
                 icon: const Icon(Icons.edit_rounded),
@@ -35,13 +37,13 @@ class ProfileScreen extends StatelessWidget {
       body: Stack(
         children: [
           GradientBackground(
-            child: Container(),
             startColor: Colors.blue.withValues(alpha:0.05),
             midColor: Colors.indigo.withValues(alpha:0.05),
             endColor: Colors.white,
+            child: Container(),
           ),
           SingleChildScrollView(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               top: kToolbarHeight + Spacing.lg,
               left: Spacing.lg,
               right: Spacing.lg,
@@ -88,7 +90,7 @@ class ProfileScreen extends StatelessWidget {
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(height: Spacing.md),
+                      const SizedBox(height: Spacing.md),
                       Text(
                         'Prayer Warrior',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -96,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                           color: AppColors.foreground,
                         ),
                       ),
-                      SizedBox(height: Spacing.xs),
+                      const SizedBox(height: Spacing.xs),
                       Text(
                         'Member since ${DateTime.now().year}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -106,7 +108,7 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: Spacing.lg),
+                const SizedBox(height: Spacing.lg),
 
                 // Statistics
                 Text(
@@ -116,7 +118,7 @@ class ProfileScreen extends StatelessWidget {
                     color: AppColors.foreground,
                   ),
                 ),
-                SizedBox(height: Spacing.md),
+                const SizedBox(height: Spacing.md),
                 Row(
                   children: [
                     Expanded(
@@ -124,12 +126,12 @@ class ProfileScreen extends StatelessWidget {
                         borderColor: AppColors.border.withValues(alpha:0.2),
                         child: Column(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.local_fire_department_rounded,
                               size: 28,
                               color: Colors.orange,
                             ),
-                            SizedBox(height: Spacing.sm),
+                            const SizedBox(height: Spacing.sm),
                             Text(
                               '${app.currentStreak}',
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -147,18 +149,18 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: Spacing.md),
+                    const SizedBox(width: Spacing.md),
                     Expanded(
                       child: GradientCard(
                         borderColor: AppColors.border.withValues(alpha:0.2),
                         child: Column(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.favorite_rounded,
                               size: 28,
                               color: Colors.pink,
                             ),
-                            SizedBox(height: Spacing.sm),
+                            const SizedBox(height: Spacing.sm),
                             Text(
                               '${app.prayers.length}',
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -176,18 +178,18 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: Spacing.md),
+                    const SizedBox(width: Spacing.md),
                     Expanded(
                       child: GradientCard(
                         borderColor: AppColors.border.withValues(alpha:0.2),
                         child: Column(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.auto_stories_rounded,
                               size: 28,
                               color: Colors.blue,
                             ),
-                            SizedBox(height: Spacing.sm),
+                            const SizedBox(height: Spacing.sm),
                             Text(
                               '42',
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -207,7 +209,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: Spacing.lg),
+                const SizedBox(height: Spacing.lg),
 
                 // Settings
                 Text(
@@ -217,7 +219,7 @@ class ProfileScreen extends StatelessWidget {
                     color: AppColors.foreground,
                   ),
                 ),
-                SizedBox(height: Spacing.md),
+                const SizedBox(height: Spacing.md),
                 GradientCard(
                   borderColor: AppColors.border.withValues(alpha:0.2),
                   child: Column(
@@ -231,7 +233,7 @@ class ProfileScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      Divider(height: 1),
+                      const Divider(height: 1),
                       _SettingsTile(
                         icon: Icons.dark_mode_rounded,
                         label: 'Theme',
@@ -241,7 +243,7 @@ class ProfileScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      Divider(height: 1),
+                      const Divider(height: 1),
                       _SettingsTile(
                         icon: Icons.privacy_tip_rounded,
                         label: 'Privacy & Security',
@@ -251,7 +253,7 @@ class ProfileScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      Divider(height: 1),
+                      const Divider(height: 1),
                       _SettingsTile(
                         icon: Icons.help_rounded,
                         label: 'Help & Support',
@@ -264,7 +266,7 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: Spacing.lg),
+                const SizedBox(height: Spacing.lg),
 
                 // About
                 GradientCard(
@@ -279,7 +281,7 @@ class ProfileScreen extends StatelessWidget {
                           color: AppColors.foreground,
                         ),
                       ),
-                      SizedBox(height: Spacing.md),
+                      const SizedBox(height: Spacing.md),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -301,7 +303,7 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: Spacing.lg),
+                const SizedBox(height: Spacing.lg),
 
                 // Logout Button
                 OutlinedButton.icon(
@@ -332,7 +334,7 @@ class ProfileScreen extends StatelessWidget {
                   icon: const Icon(Icons.logout_rounded),
                   label: const Text('Logout'),
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: Spacing.md),
+                    padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                     side: BorderSide(
                       color: AppColors.destructive.withValues(alpha:0.5),
                       width: 1,
@@ -364,7 +366,7 @@ class _SettingsTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: Spacing.md,
           vertical: Spacing.md,
         ),
@@ -378,7 +380,7 @@ class _SettingsTile extends StatelessWidget {
                   size: 20,
                   color: AppColors.primary,
                 ),
-                SizedBox(width: Spacing.md),
+                const SizedBox(width: Spacing.md),
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(

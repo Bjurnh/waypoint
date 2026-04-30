@@ -7,6 +7,8 @@ import '../widgets/gradient_background.dart';
 import '../state/app_state.dart';
 
 class NotificationsScreen extends StatefulWidget {
+  const NotificationsScreen({super.key});
+
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
@@ -56,7 +58,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> _showReminderDialog(BuildContext context, [Reminder? existing]) async {
     final isNew = existing == null;
     String title = existing?.title ?? '';
-    TimeOfDay time = existing?.time ?? TimeOfDay(hour: 8, minute: 0);
+    TimeOfDay time = existing?.time ?? const TimeOfDay(hour: 8, minute: 0);
 
     await showDialog(
       context: context,
@@ -132,7 +134,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       _notifications.removeAt(index);
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: const Text('Notification dismissed')),
+      const SnackBar(content: Text('Notification dismissed')),
     );
   }
 
@@ -148,16 +150,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       body: Stack(
         children: [
           GradientBackground(
-            child: Container(),
             startColor: Colors.pink.withValues(alpha:0.05),
             midColor: Colors.purple.withValues(alpha:0.05),
             endColor: Colors.white,
+            child: Container(),
           ),
           Consumer<AppState>(
             builder: (context, app, _) {
               final reminders = app.reminders;
               return ListView(
-                padding: EdgeInsets.only(
+                padding: const EdgeInsets.only(
                   top: kToolbarHeight + Spacing.lg,
                   left: Spacing.lg,
                   right: Spacing.lg,
@@ -205,7 +207,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             size: 64,
                             color: AppColors.border.withValues(alpha:0.5),
                           ),
-                          SizedBox(height: Spacing.lg),
+                          const SizedBox(height: Spacing.lg),
                           Text(
                             'No Notifications',
                             style: Theme.of(context)
@@ -228,7 +230,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             onMarkAsRead: () => _markAsRead(index),
                             onDelete: () => _deleteNotification(index),
                           ),
-                          SizedBox(height: Spacing.md),
+                          const SizedBox(height: Spacing.md),
                         ],
                       );
                     }),
@@ -330,7 +332,7 @@ class _NotificationCard extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: EdgeInsets.all(Spacing.md),
+          padding: const EdgeInsets.all(Spacing.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -355,7 +357,7 @@ class _NotificationCard extends StatelessWidget {
                   size: 20,
                 ),
               ),
-              SizedBox(width: Spacing.md),
+              const SizedBox(width: Spacing.md),
               // Content
               Expanded(
                 child: Column(
@@ -386,7 +388,7 @@ class _NotificationCard extends StatelessWidget {
                           ),
                       ],
                     ),
-                    SizedBox(height: Spacing.xs),
+                    const SizedBox(height: Spacing.xs),
                     Text(
                       notification.description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -395,7 +397,7 @@ class _NotificationCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: Spacing.sm),
+                    const SizedBox(height: Spacing.sm),
                     Text(
                       timeAgo,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -406,7 +408,7 @@ class _NotificationCard extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: Spacing.md),
+              const SizedBox(width: Spacing.md),
               // Actions
               PopupMenuButton(
                 itemBuilder: (context) => [
@@ -419,7 +421,7 @@ class _NotificationCard extends StatelessWidget {
                     child: const Text('Dismiss'),
                   ),
                 ],
-                icon: Icon(
+                icon: const Icon(
                   Icons.more_vert_rounded,
                   color: AppColors.textSecondary,
                 ),

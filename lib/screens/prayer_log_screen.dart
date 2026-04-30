@@ -8,6 +8,7 @@ import '../models/prayer_entry.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../utils/spacing.dart';
+import 'prayer_detail_screen.dart';
 
 typedef PrayerTapCallback = void Function(PrayerEntry prayer);
 typedef PrayerToggleCallback = void Function(String id);
@@ -44,7 +45,7 @@ class _PrayerLogScreenState extends State<PrayerLogScreen> {
     
     if (_selectedFilter != 'all') {
       filteredPrayers = filteredPrayers
-          .where((p) => p.category.toLowerCase() == _selectedFilter.toLowerCase())
+          .where((p) => (p.category?.toLowerCase() ?? '').toLowerCase() == _selectedFilter.toLowerCase())
           .toList();
     }
 
@@ -73,9 +74,9 @@ class _PrayerLogScreenState extends State<PrayerLogScreen> {
             GradientCard(
               child: TextField(
                 onChanged: (q) => setState(() { _searchQuery = q; }),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Search prayers',
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search),
                   border: InputBorder.none,
                 ),
               ),
@@ -162,9 +163,25 @@ class _PrayerLogScreenState extends State<PrayerLogScreen> {
                     if (widget.onViewPrayer != null) {
                       widget.onViewPrayer!(p);
                     } else {
-                      Provider.of<AppState>(context, listen: false)
-                          .viewPrayer(p.id);
-                      Navigator.pushNamed(context, '/detail');
+                      // open detail screen directly rather than relying on a
+                      // named route.  `viewPrayer` remains available for
+                      // flexibility but isn't required for navigation.
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PrayerDetailScreen(
+                            title: p.title,
+                            description: p.description ?? '',
+                            isAnswered: p.isAnswered,
+                            onToggleAnswered: (answered) {
+                              Provider.of<AppState>(context, listen: false)
+                                  .togglePrayerAnswered(p.id);
+                            },
+                            createdAt: p.dateAdded,
+                            answeredAt: p.answeredDate,
+                          ),
+                        ),
+                      );
                     }
                   },
                   child: Row(
@@ -185,7 +202,7 @@ class _PrayerLogScreenState extends State<PrayerLogScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              p.category,
+                              p.category ?? '',
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.mutedForeground,

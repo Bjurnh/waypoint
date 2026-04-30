@@ -134,7 +134,7 @@ class ProgressDashboardScreen extends StatelessWidget {
                       minHeight: 10,
                       backgroundColor: AppColors.mutedForeground
                           .withValues(alpha:0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(
+                      valueColor: const AlwaysStoppedAnimation<Color>(
                         AppColors.blueGradientStart,
                       ),
                     ),
@@ -287,7 +287,7 @@ class ProgressDashboardScreen extends StatelessWidget {
                           ),
                           child: Text(
                             prayers.toString(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
                               color: AppColors.pinkGradientStart,

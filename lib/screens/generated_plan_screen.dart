@@ -4,12 +4,12 @@ import '../widgets/progress_circle.dart';
 import '../widgets/gradient_background.dart';
 import '../widgets/modern_appbar.dart';
 import '../widgets/gradient_card.dart';
-import '../models/plan_models.dart';
+import '../models/day_reading.dart';
 import '../theme/app_colors.dart';
 import '../utils/spacing.dart';
 import '../utils/chart_styles.dart';
 
-typedef ToggleCompletion = void Function(int day);
+typedef ToggleCompletion = void Function(String id);
 
 class GeneratedPlanScreen extends StatefulWidget {
   final List<DayReading> readings;
@@ -40,6 +40,7 @@ class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
         appBar: ModernAppBar.progress(
           title: 'Reading Plan',
           subtitle: '${widget.readings.length} days',
+          showBackButton: true,
         ),
         body: CustomScrollView(
           slivers: [
@@ -53,17 +54,18 @@ class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
                 background: Padding(
                   padding: const EdgeInsets.all(Spacing.md),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Center(
                         child: ProgressCircle(
                           value: progress,
-                          size: 160,
+                          size: 120,  // Reduced from 160 to fit available space
                           label: 'Reading Progress',
                           progressColor: AppColors.blueGradientStart,
                           animate: true,
                         ),
                       ),
-                      const SizedBox(height: Spacing.lg),
+                      const SizedBox(height: Spacing.sm),  // Reduced spacing
 
                       // Progress stats row
                       Row(
@@ -77,7 +79,7 @@ class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
                           ),
                           Container(
                             width: 1,
-                            height: 50,
+                            height: 40,  // Reduced height
                             color: AppColors.border,
                           ),
                           _ProgressStat(
@@ -138,9 +140,9 @@ class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
                       onToggle: () {
                         setState(() {
                           widget.onToggleCompletion
-                              ?.call(reading.day);
+                              ?.call(reading.id);
                         });
-                      },
+                      }
                     ),
                   );
                 },
@@ -290,7 +292,7 @@ class _ReadingCardState extends State<_ReadingCard>
                   ),
                 ),
                 child: widget.reading.completed
-                    ? Icon(
+                    ? const Icon(
                         Icons.check,
                         color: AppColors.greenGradientStart,
                         size: 24,
@@ -315,7 +317,7 @@ class _ReadingCardState extends State<_ReadingCard>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Day ${widget.reading.day} • ${widget.reading.date}',
+                    'Day ${widget.index + 1} • ${widget.reading.date.toIso8601String().split('T').first}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: widget.reading.completed
                               ? AppColors.mutedForeground
@@ -343,8 +345,8 @@ class _ReadingCardState extends State<_ReadingCard>
 
             // Completion indicator
             if (widget.reading.completed)
-              Padding(
-                padding: const EdgeInsets.only(left: Spacing.md),
+              const Padding(
+                padding: EdgeInsets.only(left: Spacing.md),
                 child: Icon(
                   Icons.done_all,
                   color: AppColors.greenGradientStart,

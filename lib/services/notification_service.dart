@@ -19,7 +19,16 @@ class NotificationService {
   }) async {
     // initialize timezone database for zonedSchedule
     tzdata.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation(DateTime.now().timeZoneName));
+    
+    // Handle timezone safely - fallback to UTC if device timezone is unavailable
+    try {
+      final timezoneName = DateTime.now().timeZoneName;
+      tz.setLocalLocation(tz.getLocation(timezoneName));
+    } catch (e) {
+      // Device timezone not in database, fallback to UTC
+      print('Warning: Device timezone not found, using UTC. Error: $e');
+      tz.setLocalLocation(tz.getLocation('UTC'));
+    }
 
     const defaultAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
     const defaultIos = DarwinInitializationSettings();

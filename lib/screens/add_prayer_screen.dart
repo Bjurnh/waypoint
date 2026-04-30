@@ -7,6 +7,8 @@ import '../widgets/gradient_background.dart';
 import '../widgets/gradient_card.dart';
 
 class AddPrayerScreen extends StatefulWidget {
+  const AddPrayerScreen({super.key});
+
   @override
   _AddPrayerScreenState createState() => _AddPrayerScreenState();
 }
@@ -99,13 +101,13 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
       body: Stack(
         children: [
           GradientBackground(
-            child: Container(),
             startColor: Colors.pink.withValues(alpha: 0.05),
             midColor: Colors.purple.withValues(alpha: 0.05),
             endColor: Colors.white,
+            child: Container(),
           ),
           SingleChildScrollView(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               top: kToolbarHeight + Spacing.lg,
               left: Spacing.lg,
               right: Spacing.lg,
@@ -127,7 +129,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                           color: AppColors.foreground,
                         ),
                       ),
-                      SizedBox(height: Spacing.md),
+                      const SizedBox(height: Spacing.md),
                       TextField(
                         controller: _titleCtrl,
                         decoration: InputDecoration(
@@ -139,7 +141,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: Spacing.md,
                             vertical: Spacing.md,
                           ),
@@ -152,7 +154,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: Spacing.lg),
+                const SizedBox(height: Spacing.lg),
 
                 // Category Selection
                 GradientCard(
@@ -167,7 +169,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                           color: AppColors.foreground,
                         ),
                       ),
-                      SizedBox(height: Spacing.md),
+                      const SizedBox(height: Spacing.md),
                       Wrap(
                         spacing: Spacing.md,
                         runSpacing: Spacing.md,
@@ -209,7 +211,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: Spacing.lg),
+                const SizedBox(height: Spacing.lg),
 
                 // Prayer Description/Details
                 GradientCard(
@@ -224,7 +226,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                           color: AppColors.foreground,
                         ),
                       ),
-                      SizedBox(height: Spacing.md),
+                      const SizedBox(height: Spacing.md),
                       TextField(
                         controller: _descriptionCtrl,
                         decoration: InputDecoration(
@@ -232,7 +234,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: Spacing.md,
                             vertical: Spacing.md,
                           ),
@@ -245,22 +247,22 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: Spacing.xl),
+                const SizedBox(height: Spacing.xl),
 
                 // Submit Button
                 FilledButton(
                   onPressed: _isSubmitting ? null : _submit,
                   style: FilledButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: Spacing.md),
+                    padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                     backgroundColor: categoryColor,
                   ),
                   child: _isSubmitting
-                      ? SizedBox(
+                      ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: const AlwaysStoppedAnimation(Colors.white),
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
                           ),
                         )
                       : Text(
@@ -271,11 +273,11 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                           ),
                         ),
                 ),
-                SizedBox(height: Spacing.md),
+                const SizedBox(height: Spacing.md),
                 OutlinedButton(
                   onPressed: _isSubmitting ? null : () => Navigator.maybePop(context),
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: Spacing.md),
+                    padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                   ),
                   child: const Text('Cancel'),
                 ),

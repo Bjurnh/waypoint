@@ -582,7 +582,7 @@ class _HabitCardState extends State<_HabitCard>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Completion Rate',
                     style: TextStyle(
                       fontSize: 12,
