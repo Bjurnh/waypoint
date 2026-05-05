@@ -41,10 +41,10 @@ class GradientCard extends StatelessWidget {
   const GradientCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(Spacing.lg),
-    this.borderRadius = 20,
+    this.padding = const EdgeInsets.all(Spacing.xl),
+    this.borderRadius = 24,
     this.showShadow = true,
-    this.shadowLevel = 'md',
+    this.shadowLevel = 'sm',
     this.borderColor,
     this.backgroundColor,
     this.gradientStart,
@@ -130,7 +130,7 @@ class GradientCard extends StatelessWidget {
     required Color gradientStart,
     required Color gradientEnd,
     EdgeInsets padding = const EdgeInsets.all(Spacing.lg),
-    double borderRadius = 20,
+    double borderRadius = 24,
   }) {
     return GradientCard(
       key: key,

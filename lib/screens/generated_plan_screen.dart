@@ -28,13 +28,11 @@ class GeneratedPlanScreen extends StatefulWidget {
 class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
   @override
   Widget build(BuildContext context) {
-    final completedCount =
-        widget.readings.where((r) => r.completed).length;
-    final progress = widget.readings.isEmpty
-        ? 0.0
-        : completedCount / widget.readings.length;
+    final completedCount = widget.readings.where((r) => r.completed).length;
+    final progress =
+        widget.readings.isEmpty ? 0.0 : completedCount / widget.readings.length;
 
-    return GradientBackground.plan(
+    return GradientBackground.home(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: ModernAppBar.progress(
@@ -59,18 +57,17 @@ class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
                       Center(
                         child: ProgressCircle(
                           value: progress,
-                          size: 120,  // Reduced from 160 to fit available space
+                          size: 120, // Reduced from 160 to fit available space
                           label: 'Reading Progress',
                           progressColor: AppColors.blueGradientStart,
                           animate: true,
                         ),
                       ),
-                      const SizedBox(height: Spacing.sm),  // Reduced spacing
+                      const SizedBox(height: Spacing.sm), // Reduced spacing
 
                       // Progress stats row
                       Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           _ProgressStat(
                             label: 'Completed',
@@ -79,13 +76,12 @@ class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
                           ),
                           Container(
                             width: 1,
-                            height: 40,  // Reduced height
+                            height: 40, // Reduced height
                             color: AppColors.border,
                           ),
                           _ProgressStat(
                             label: 'Remaining',
-                            value: widget.readings.length -
-                                completedCount,
+                            value: widget.readings.length - completedCount,
                             color: AppColors.mutedForeground,
                           ),
                         ],
@@ -108,15 +104,17 @@ class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: Spacing.md),
-                    GradientCard(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.md,
-                        vertical: Spacing.lg,
-                      ),
-                      child: SizedBox(
-                        height: ChartStyles.chartHeight,
-                        child: LineChart(
-                          _buildWeeklyChart(completedCount),
+                    GradientCard.home(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Spacing.md,
+                          vertical: Spacing.lg,
+                        ),
+                        child: SizedBox(
+                          height: ChartStyles.chartHeight,
+                          child: LineChart(
+                            _buildWeeklyChart(completedCount),
+                          ),
                         ),
                       ),
                     ),
@@ -135,15 +133,13 @@ class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: Spacing.md),
                     child: _ReadingCard(
-                      reading: reading,
-                      index: index,
-                      onToggle: () {
-                        setState(() {
-                          widget.onToggleCompletion
-                              ?.call(reading.id);
-                        });
-                      }
-                    ),
+                        reading: reading,
+                        index: index,
+                        onToggle: () {
+                          setState(() {
+                            widget.onToggleCompletion?.call(reading.id);
+                          });
+                        }),
                   );
                 },
               ),
@@ -158,9 +154,8 @@ class _GeneratedPlanScreenState extends State<GeneratedPlanScreen> {
   LineChartData _buildWeeklyChart(int completedCount) {
     // Distribute completed readings across 7 days
     final weekData = List<int>.filled(7, 0);
-    final daysPerWeek = widget.readings.length > 7
-        ? (widget.readings.length / 7).ceil()
-        : 1;
+    final daysPerWeek =
+        widget.readings.length > 7 ? (widget.readings.length / 7).ceil() : 1;
 
     var completed = 0;
     for (int day = 0; day < 7 && completed < completedCount; day++) {
@@ -330,10 +325,7 @@ class _ReadingCardState extends State<_ReadingCard>
                   const SizedBox(height: Spacing.xs),
                   Text(
                     widget.reading.chapters.join(', '),
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
                         ),
                     maxLines: 2,

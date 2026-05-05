@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:waypoint_app/models/day_reading.dart';
 import 'package:provider/provider.dart';
 import 'package:waypoint_app/state/app_state.dart';
@@ -38,66 +38,77 @@ class BiblePlanScreen extends StatelessWidget {
           leading: BackButton(onPressed: () => Navigator.maybePop(context)),
         ),
         body: SafeArea(
-          child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.lg,
+              vertical: Spacing.lg,
+            ),
             child: readings.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(Spacing.lg),
-                    child: Container(
-                      padding: const EdgeInsets.all(Spacing.lg),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: Spacing.shadowLg,
-                        border: Border.all(color: AppColors.cardBorderPlan),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.auto_stories,
-                            size: 72,
-                            color: AppColors.primary,
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: Spacing.xl),
+                      Padding(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: Spacing.sm),
+                        child: Container(
+                          padding: const EdgeInsets.all(Spacing.lg),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: Spacing.shadowLg,
+                            border: Border.all(color: AppColors.cardBorderPlan),
                           ),
-                          const SizedBox(height: Spacing.lg),
-                          const Text(
-                            'No Reading Plan Yet',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: Spacing.md),
-                          const Text(
-                            'Create your personalized Bible reading plan to start your journey.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: Spacing.xl),
-                          FilledButton(
-                            onPressed: () =>
-                                Navigator.pushNamed(context, '/generate-plan'),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.xl,
-                                vertical: Spacing.md,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.auto_stories,
+                                size: 72,
+                                color: AppColors.primary,
                               ),
-                              backgroundColor: AppColors.primary,
-                            ),
-                            child: const Text(
-                              'Create Reading Plan',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                              const SizedBox(height: Spacing.lg),
+                              const Text(
+                                'No Reading Plan Yet',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
-                            ),
+                              const SizedBox(height: Spacing.md),
+                              const Text(
+                                'Create your personalized Bible reading plan to start your journey.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: Spacing.xl),
+                              FilledButton(
+                                onPressed: () => Navigator.pushNamed(
+                                    context, '/generate-plan'),
+                                style: FilledButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: Spacing.xl,
+                                    vertical: Spacing.md,
+                                  ),
+                                  backgroundColor: AppColors.primary,
+                                ),
+                                child: const Text(
+                                  'Create Reading Plan',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   )
                 : SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -219,8 +230,7 @@ class BiblePlanScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: Spacing.lg),
-                        GradientCard(
-                          borderColor: AppColors.cardBorderPlan,
+                        GradientCard.plan(
                           padding: const EdgeInsets.all(Spacing.lg),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,8 +245,10 @@ class BiblePlanScreen extends StatelessWidget {
                               const SizedBox(height: Spacing.md),
                               ReadingProgressIndicator(
                                 label: 'Chapters read',
-                                chaptersRead: _calculateCompletedChapters(readings),
-                                totalChapters: _calculateTotalChapters(readings),
+                                chaptersRead:
+                                    _calculateCompletedChapters(readings),
+                                totalChapters:
+                                    _calculateTotalChapters(readings),
                                 currentBook: _getCurrentBook(readings),
                                 color: AppColors.primary,
                               ),
@@ -248,12 +260,16 @@ class BiblePlanScreen extends StatelessWidget {
                           onPressed: () =>
                               Navigator.pushNamed(context, '/generate-plan'),
                           style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: Spacing.md),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: Spacing.md),
                             backgroundColor: AppColors.primary,
                           ),
                           child: Text(
                             'Generate New Reading Plan',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -297,18 +313,21 @@ class BiblePlanScreen extends StatelessWidget {
                                 dayDate.toIso8601String().split('T').first;
                             final available = !dayDate.isAfter(DateTime.now());
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: Spacing.lg),
+                              padding:
+                                  const EdgeInsets.only(bottom: Spacing.lg),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(color: AppColors.cardBorderPlan),
+                                  border: Border.all(
+                                      color: AppColors.cardBorderPlan),
                                   boxShadow: Spacing.shadowMd,
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(Spacing.lg),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       Row(
                                         crossAxisAlignment:
@@ -326,8 +345,9 @@ class BiblePlanScreen extends StatelessWidget {
                                                 begin: Alignment.topLeft,
                                                 end: Alignment.bottomRight,
                                               ),
-                                              borderRadius: BorderRadius.circular(
-                                                  Spacing.radiusXl),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      Spacing.radiusXl),
                                             ),
                                             child: const Icon(
                                               Icons.menu_book,
@@ -351,15 +371,16 @@ class BiblePlanScreen extends StatelessWidget {
                                                             FontWeight.w700,
                                                       ),
                                                 ),
-                                                const SizedBox(height: Spacing.xs),
+                                                const SizedBox(
+                                                    height: Spacing.xs),
                                                 Text(
                                                   formattedDate,
                                                   style: Theme.of(context)
                                                       .textTheme
                                                       .bodySmall
                                                       ?.copyWith(
-                                                          color:
-                                                              AppColors.textSecondary),
+                                                          color: AppColors
+                                                              .textSecondary),
                                                 ),
                                               ],
                                             ),
@@ -388,8 +409,9 @@ class BiblePlanScreen extends StatelessWidget {
                                                   .bodySmall
                                                   ?.copyWith(
                                                     color: day.completed
-                                                        ? AppColors.primary
-                                                        : AppColors.textSecondary,
+                                                        ? AppColors.textSuccess
+                                                        : AppColors
+                                                            .textSecondary,
                                                   ),
                                             ),
                                           ),
@@ -402,12 +424,14 @@ class BiblePlanScreen extends StatelessWidget {
                                           runSpacing: Spacing.sm,
                                           children: day.chapters.map((chapter) {
                                             return Container(
-                                              padding: const EdgeInsets.symmetric(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
                                                 horizontal: Spacing.sm,
                                                 vertical: 8,
                                               ),
                                               decoration: BoxDecoration(
-                                                color: AppColors.inputBackground,
+                                                color:
+                                                    AppColors.inputBackground,
                                                 borderRadius:
                                                     BorderRadius.circular(16),
                                               ),
@@ -417,7 +441,8 @@ class BiblePlanScreen extends StatelessWidget {
                                                     .textTheme
                                                     .bodySmall
                                                     ?.copyWith(
-                                                      color: AppColors.textPrimary,
+                                                      color:
+                                                          AppColors.textPrimary,
                                                     ),
                                               ),
                                             );
@@ -461,11 +486,13 @@ class BiblePlanScreen extends StatelessWidget {
                                             )
                                           : Container(
                                               width: double.infinity,
-                                              padding: const EdgeInsets.symmetric(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
                                                 vertical: Spacing.md,
                                               ),
                                               decoration: BoxDecoration(
-                                                color: AppColors.inputBackground,
+                                                color:
+                                                    AppColors.inputBackground,
                                                 borderRadius:
                                                     BorderRadius.circular(16),
                                               ),
@@ -476,8 +503,8 @@ class BiblePlanScreen extends StatelessWidget {
                                                       .textTheme
                                                       .bodySmall
                                                       ?.copyWith(
-                                                        color:
-                                                            AppColors.textSecondary,
+                                                        color: AppColors
+                                                            .textSecondary,
                                                       ),
                                                 ),
                                               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/plan_models.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import '../utils/spacing.dart';
 import '../widgets/gradient_background.dart';
 import '../widgets/gradient_card.dart';
@@ -196,311 +197,372 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
         ? 'Continue from current reading'
         : 'Start a new plan from Genesis to Revelation';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Generate Plan'),
-        leading: BackButton(
-            onPressed: widget.onBack ?? () => Navigator.maybePop(context)),
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          GradientBackground(
-            startColor: Colors.blue.withValues(alpha: 0.05),
-            midColor: Colors.purple.withValues(alpha: 0.05),
-            endColor: Colors.white,
-            child: Container(),
+    final chipActiveColor = AppColors.blueGradientStart.withAlpha(220);
+    final chipLabelStyle = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.copyWith(fontWeight: FontWeight.w600);
+
+    InputDecoration inputDecoration(String label) {
+      return AppTheme.inputDecoration(
+        labelText: label,
+        fillColor: AppColors.inputBackground,
+        borderColor: AppColors.border.withAlpha((0.25 * 255).round()),
+      );
+    }
+
+    Widget optionChip({
+      required String label,
+      required bool selected,
+      required void Function(bool) onSelected,
+      bool isFilter = false,
+    }) {
+      final chip = isFilter ? FilterChip(
+        selected: selected,
+        onSelected: onSelected,
+        label: Text(label),
+        labelStyle: chipLabelStyle?.copyWith(
+          color: selected ? Colors.white : AppColors.foreground,
+        ),
+        selectedColor: chipActiveColor,
+        backgroundColor: AppColors.card,
+        side: BorderSide(
+          color: selected
+              ? AppColors.blueGradientStart
+              : AppColors.border.withAlpha((0.3 * 255).round()),
+          width: 1.5,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+      ) : ChoiceChip(
+        selected: selected,
+        onSelected: onSelected,
+        label: Text(label),
+        labelStyle: chipLabelStyle?.copyWith(
+          color: selected ? Colors.white : AppColors.foreground,
+        ),
+        selectedColor: chipActiveColor,
+        backgroundColor: AppColors.card,
+        side: BorderSide(
+          color: selected
+              ? AppColors.blueGradientStart
+              : AppColors.border.withAlpha((0.3 * 255).round()),
+          width: 1.5,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+      );
+
+      return chip;
+    }
+
+    return GradientBackground.plan(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: const Text('Generate Plan'),
+          leading: BackButton(
+            onPressed: widget.onBack ?? () => Navigator.maybePop(context),
           ),
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(
-              top: kToolbarHeight + Spacing.lg,
-              left: Spacing.lg,
-              right: Spacing.lg,
-              bottom: Spacing.lg,
+        ),
+        extendBodyBehindAppBar: true,
+        body: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.lg,
+              vertical: Spacing.xl,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                GradientCard(
-                  borderColor: AppColors.border.withValues(alpha: 0.2),
+                Text(
+                  'Build your Bible plan',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.foreground,
+                      ),
+                ),
+                const SizedBox(height: Spacing.sm),
+                Text(
+                  'Choose a gentle pace, set your start date, and let the app create a balanced reading plan for you.',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: Spacing.xl),
+                GradientCard.home(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Plan Type',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
                               color: AppColors.foreground,
                             ),
                       ),
                       const SizedBox(height: Spacing.md),
                       Wrap(
                         spacing: Spacing.md,
+                        runSpacing: Spacing.sm,
                         children: [
-                          ChoiceChip(
+                          optionChip(
+                            label: 'Start New Plan',
                             selected: _planMode == 'start',
                             onSelected: (selected) {
                               if (selected) {
                                 setState(() => _planMode = 'start');
                               }
                             },
-                            label: const Text('Start New Plan'),
-                            selectedColor:
-                                AppColors.primary.withValues(alpha: 0.8),
                           ),
-                          ChoiceChip(
+                          optionChip(
+                            label: 'Continue From Current Reading',
                             selected: _planMode == 'continue',
                             onSelected: (selected) {
                               if (selected) {
                                 setState(() => _planMode = 'continue');
                               }
                             },
-                            label: const Text('Continue From Current Reading'),
-                            selectedColor:
-                                AppColors.primary.withValues(alpha: 0.8),
                           ),
                         ],
                       ),
                       const SizedBox(height: Spacing.sm),
                       Text(
                         modeLabel,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: AppColors.textSecondary,
                             ),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(height: Spacing.xl),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  child: _planMode == 'start'
+                      ? Column(
+                          key: const ValueKey('startMode'),
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            GradientCard.home(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Reading Duration',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.foreground,
+                                        ),
+                                  ),
+                                  const SizedBox(height: Spacing.md),
+                                  Wrap(
+                                    spacing: Spacing.md,
+                                    runSpacing: Spacing.md,
+                                    children: timeFrameOptions.map((days) {
+                                      final isSelected = _selectedTimeFrame == days;
+                                      return optionChip(
+                                        label: '${int.parse(days)} days',
+                                        selected: isSelected,
+                                        onSelected: (selected) {
+                                          if (selected) {
+                                            setState(() => _selectedTimeFrame = days);
+                                          }
+                                        },
+                                        isFilter: true,
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: Spacing.lg),
+                            GradientCard.home(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Reading Style',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.foreground,
+                                        ),
+                                  ),
+                                  const SizedBox(height: Spacing.md),
+                                  Wrap(
+                                    spacing: Spacing.md,
+                                    runSpacing: Spacing.sm,
+                                    children: [
+                                      optionChip(
+                                        label: 'Sequential',
+                                        selected: _readingStyle == 'sequential',
+                                        onSelected: (selected) {
+                                          if (selected) {
+                                            setState(() => _readingStyle = 'sequential');
+                                          }
+                                        },
+                                      ),
+                                      optionChip(
+                                        label: 'Mixed (Old & New Testament)',
+                                        selected: _readingStyle == 'mixed',
+                                        onSelected: (selected) {
+                                          if (selected) {
+                                            setState(() => _readingStyle = 'mixed');
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: Spacing.sm),
+                                  Text(
+                                    _readingStyle == 'sequential'
+                                        ? 'Read chapters in order from Genesis to Revelation'
+                                        : 'Alternate between Old Testament and New Testament chapters',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          key: const ValueKey('continueMode'),
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            GradientCard.home(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    'Current Reading Position',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.foreground,
+                                        ),
+                                  ),
+                                  const SizedBox(height: Spacing.md),
+                                  DropdownButtonFormField<String>(
+                                    initialValue: _selectedLastBook,
+                                    items: _bibleBooks
+                                        .map((book) => DropdownMenuItem(
+                                              value: book,
+                                              child: Text(book),
+                                            ))
+                                        .toList(),
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setState(() => _selectedLastBook = value);
+                                      }
+                                    },
+                                    decoration: inputDecoration('Last Read Book'),
+                                  ),
+                                  const SizedBox(height: Spacing.md),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _lastChapterCtrl,
+                                          keyboardType: TextInputType.number,
+                                          decoration: inputDecoration('Chapter'),
+                                        ),
+                                      ),
+                                      const SizedBox(width: Spacing.md),
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _lastVerseCtrl,
+                                          keyboardType: TextInputType.number,
+                                          decoration: inputDecoration('Verse (optional)'),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: Spacing.lg),
+                            GradientCard.home(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Target Completion',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.foreground,
+                                        ),
+                                  ),
+                                  const SizedBox(height: Spacing.md),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'Complete by $endDateStr',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: AppColors.primary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                      ),
+                                      FilledButton.tonal(
+                                        onPressed: _pickEndDate,
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: AppColors.card,
+                                          foregroundColor: AppColors.primary,
+                                          minimumSize: const Size(120, 48),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(24),
+                                          ),
+                                        ),
+                                        child: const Text('Choose Date'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
                 const SizedBox(height: Spacing.lg),
-                if (_planMode == 'start') ...[
-                  GradientCard(
-                    borderColor: AppColors.border.withValues(alpha: 0.2),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Reading Duration',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.foreground,
-                                  ),
-                        ),
-                        const SizedBox(height: Spacing.md),
-                        Wrap(
-                          spacing: Spacing.md,
-                          runSpacing: Spacing.md,
-                          children: timeFrameOptions.map((days) {
-                            final isSelected = _selectedTimeFrame == days;
-                            return FilterChip(
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                if (selected) {
-                                  setState(() => _selectedTimeFrame = days);
-                                }
-                              },
-                              label: Text(
-                                '${int.parse(days)} days',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : AppColors.foreground,
-                                ),
-                              ),
-                              selectedColor:
-                                  AppColors.primary.withValues(alpha: 0.8),
-                              side: BorderSide(
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.border.withValues(alpha: 0.4),
-                                width: 1.5,
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: Spacing.lg),
-                  GradientCard(
-                    borderColor: AppColors.border.withValues(alpha: 0.2),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Reading Style',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.foreground,
-                                  ),
-                        ),
-                        const SizedBox(height: Spacing.md),
-                        Wrap(
-                          spacing: Spacing.md,
-                          children: [
-                            ChoiceChip(
-                              selected: _readingStyle == 'sequential',
-                              onSelected: (selected) {
-                                if (selected) {
-                                  setState(() => _readingStyle = 'sequential');
-                                }
-                              },
-                              label: const Text('Sequential'),
-                              selectedColor:
-                                  AppColors.primary.withValues(alpha: 0.8),
-                            ),
-                            ChoiceChip(
-                              selected: _readingStyle == 'mixed',
-                              onSelected: (selected) {
-                                if (selected) {
-                                  setState(() => _readingStyle = 'mixed');
-                                }
-                              },
-                              label: const Text('Mixed (Old & New Testament)'),
-                              selectedColor:
-                                  AppColors.primary.withValues(alpha: 0.8),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: Spacing.sm),
-                        Text(
-                          _readingStyle == 'sequential'
-                              ? 'Read chapters in order from Genesis to Revelation'
-                              : 'Alternate between Old Testament and New Testament chapters',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: Spacing.lg),
-                ],
-                if (_planMode == 'continue') ...[
-                  GradientCard(
-                    borderColor: AppColors.border.withValues(alpha: 0.2),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Current Reading Position',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.foreground,
-                                  ),
-                        ),
-                        const SizedBox(height: Spacing.md),
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedLastBook,
-                          items: _bibleBooks
-                              .map((book) => DropdownMenuItem(
-                                  value: book, child: Text(book)))
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => _selectedLastBook = value);
-                            }
-                          },
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: AppColors.inputBackground,
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none),
-                            labelText: 'Last Read Book',
-                          ),
-                        ),
-                        const SizedBox(height: Spacing.md),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _lastChapterCtrl,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: AppColors.inputBackground,
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none),
-                                  labelText: 'Chapter',
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: Spacing.md),
-                            Expanded(
-                              child: TextField(
-                                controller: _lastVerseCtrl,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: AppColors.inputBackground,
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none),
-                                  labelText: 'Verse (optional)',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: Spacing.lg),
-                  GradientCard(
-                    borderColor: AppColors.border.withValues(alpha: 0.2),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Target Completion',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.foreground,
-                                  ),
-                        ),
-                        const SizedBox(height: Spacing.md),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Complete by $endDateStr',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                              ),
-                            ),
-                            FilledButton.tonal(
-                              onPressed: _pickEndDate,
-                              child: const Text('Choose Date'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: Spacing.lg),
-                ],
-                GradientCard(
-                  borderColor: AppColors.border.withValues(alpha: 0.2),
+                GradientCard.home(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Start Date',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
                               color: AppColors.foreground,
                             ),
                       ),
@@ -515,11 +577,19 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                                 .bodyMedium
                                 ?.copyWith(
                                   color: AppColors.primary,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                           ),
                           FilledButton.tonal(
                             onPressed: _pickDate,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.card,
+                              foregroundColor: AppColors.primary,
+                              minimumSize: const Size(140, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                            ),
                             child: const Text('Change Date'),
                           ),
                         ],
@@ -529,14 +599,15 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                 ),
                 const SizedBox(height: Spacing.lg),
                 GradientCard(
-                  borderColor: AppColors.border.withValues(alpha: 0.2),
+                  backgroundColor: AppColors.secondary,
+                  borderColor: AppColors.border.withAlpha((0.2 * 255).round()),
                   child: Padding(
                     padding: const EdgeInsets.all(Spacing.md),
                     child: Text(
                       _planMode == 'continue'
                           ? 'The generator will include unread chapters from $_selectedLastBook ${_lastChapterCtrl.text}${_lastVerseCtrl.text.isNotEmpty ? ':${_lastVerseCtrl.text}' : ''} and spread them across ${_computeTargetDays()} days to complete by $endDateStr.'
                           : 'Create a balanced full Bible plan from Genesis through Revelation in ${_computeTargetDays()} days.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppColors.textSecondary,
                           ),
                     ),
@@ -546,17 +617,26 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                 FilledButton(
                   onPressed: _generate,
                   style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(56),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                   ),
                   child: const Text(
                     'Generate Plan',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),
                 const SizedBox(height: Spacing.md),
                 OutlinedButton(
                   onPressed: widget.onBack ?? () => Navigator.maybePop(context),
                   style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(56),
+                    side: BorderSide(color: AppColors.border.withAlpha((0.35 * 255).round())),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                   ),
                   child: const Text('Cancel'),
@@ -564,7 +644,7 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
