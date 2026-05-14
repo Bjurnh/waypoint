@@ -86,25 +86,38 @@ class BiblePlanScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: Spacing.xl),
-                              FilledButton(
-                                onPressed: () => Navigator.pushNamed(
-                                    context, '/generate-plan'),
-                                style: FilledButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: Spacing.xl,
-                                    vertical: Spacing.md,
-                                  ),
-                                  backgroundColor: AppColors.homeGradientStart,
-                                  foregroundColor: AppColors.textPrimary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Create Reading Plan',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                              GradientCard.withGradient(
+                                gradientStart: AppColors.blueGradientStart,
+                                gradientEnd: AppColors.blueGradientEnd,
+                                borderRadius: 20,
+                                padding: EdgeInsets.zero,
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton(
+                                    onPressed: () => Navigator.pushNamed(
+                                        context, '/generate-plan'),
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: Spacing.xl,
+                                        vertical: Spacing.md,
+                                      ),
+                                      backgroundColor: Colors.transparent,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20),
+                                        side: BorderSide.none,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Create Reading Plan',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -139,9 +152,7 @@ class BiblePlanScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: Spacing.xl),
-                        GradientCard.withGradient(
-                          gradientStart: AppColors.blueGradientStart,
-                          gradientEnd: AppColors.blueGradientEnd,
+                        GradientCard.plan(
                           padding: const EdgeInsets.all(Spacing.lg),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,7 +189,7 @@ class BiblePlanScreen extends StatelessWidget {
                                           'Today’s Progress',
                                           style: TextStyle(
                                             fontSize: 14,
-                                            color: Colors.white70,
+                                            color: AppColors.textSecondary,
                                           ),
                                         ),
                                         const SizedBox(height: Spacing.xs),
@@ -187,7 +198,7 @@ class BiblePlanScreen extends StatelessWidget {
                                           style: const TextStyle(
                                             fontSize: 22,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                            color: AppColors.textPrimary,
                                           ),
                                         ),
                                       ],
@@ -202,7 +213,7 @@ class BiblePlanScreen extends StatelessWidget {
                                     : 'Keep going — ${readings.length - completedDays} readings left.',
                                 style: const TextStyle(
                                   fontSize: 14,
-                                  color: Colors.white70,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -260,27 +271,38 @@ class BiblePlanScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: Spacing.lg),
-                        FilledButton(
-                          onPressed: () =>
-                              Navigator.pushNamed(context, '/generate-plan'),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: Spacing.md),
-                            backgroundColor: AppColors.homeGradientStart,
-                            foregroundColor: AppColors.textPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: Text(
-                            'Generate New Reading Plan',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
-                                ?.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
+                        GradientCard.withGradient(
+                          gradientStart: AppColors.blueGradientStart,
+                          gradientEnd: AppColors.blueGradientEnd,
+                          borderRadius: 20,
+                          padding: const EdgeInsets.all(0),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: () => Navigator.pushNamed(
+                                  context, '/generate-plan'),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: Spacing.md),
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide.none,
                                 ),
+                              ),
+                              child: Text(
+                                'Generate New Reading Plan',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: Spacing.lg),
@@ -459,42 +481,82 @@ class BiblePlanScreen extends StatelessWidget {
                                       ],
                                       const SizedBox(height: Spacing.md),
                                       available
-                                          ? FilledButton(
-                                              onPressed: day.completed
-                                                  ? null
-                                                  : () {
-                                                      context
-                                                          .read<AppState>()
-                                                          .toggleReadingCompletion(
-                                                              day.id);
-                                                    },
-                                              style: FilledButton.styleFrom(
-                                                backgroundColor: day.completed
-                                                    ? AppColors.secondary
-                                                    : AppColors.homeGradientStart,
-                                                foregroundColor: day.completed
-                                                    ? AppColors.textSecondary
-                                                    : AppColors.textPrimary,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(20),
-                                                ),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  vertical: Spacing.md,
-                                                ),
-                                              ),
-                                              child: Text(
-                                                day.completed
-                                                    ? 'Completed'
-                                                    : 'Mark Complete',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: day.completed
-                                                      ? AppColors.textSecondary
-                                                      : Colors.white,
-                                                ),
-                                              ),
-                                            )
+                                          ? (day.completed
+                                              ? FilledButton(
+                                                  onPressed: null,
+                                                  style: FilledButton.styleFrom(
+                                                    backgroundColor:
+                                                        AppColors.secondary,
+                                                    foregroundColor:
+                                                        AppColors.textSecondary,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                    ),
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                      vertical: Spacing.md,
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    'Completed',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color:
+                                                          AppColors.textSecondary,
+                                                    ),
+                                                  ),
+                                                )
+                                              : GradientCard.withGradient(
+                                                  gradientStart:
+                                                      AppColors.blueGradientStart,
+                                                  gradientEnd:
+                                                      AppColors.blueGradientEnd,
+                                                  borderRadius: 20,
+                                                  padding:
+                                                      const EdgeInsets.all(0),
+                                                  child: SizedBox(
+                                                    width: double.infinity,
+                                                    child: FilledButton(
+                                                      onPressed: () {
+                                                        context
+                                                            .read<AppState>()
+                                                            .toggleReadingCompletion(
+                                                                day.id);
+                                                      },
+                                                      style: FilledButton.styleFrom(
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                        elevation: 0,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(20),
+                                                          side:
+                                                              BorderSide.none,
+                                                        ),
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                          vertical: Spacing.md,
+                                                        ),
+                                                      ),
+                                                      child: const Text(
+                                                        'Mark Complete',
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ))
                                           : Container(
                                               width: double.infinity,
                                               padding:

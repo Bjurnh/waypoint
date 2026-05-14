@@ -217,67 +217,65 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
       required void Function(bool) onSelected,
       bool isFilter = false,
     }) {
-      final chip = isFilter ? FilterChip(
-        selected: selected,
-        onSelected: onSelected,
-        label: Text(label),
-        labelStyle: chipLabelStyle?.copyWith(
-          color: selected ? Colors.white : AppColors.foreground,
-        ),
-        selectedColor: chipActiveColor,
-        backgroundColor: AppColors.card,
-        side: BorderSide(
-          color: selected
-              ? AppColors.blueGradientStart
-              : AppColors.border.withAlpha((0.3 * 255).round()),
-          width: 1.5,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-      ) : ChoiceChip(
-        selected: selected,
-        onSelected: onSelected,
-        label: Text(label),
-        labelStyle: chipLabelStyle?.copyWith(
-          color: selected ? Colors.white : AppColors.foreground,
-        ),
-        selectedColor: chipActiveColor,
-        backgroundColor: AppColors.card,
-        side: BorderSide(
-          color: selected
-              ? AppColors.blueGradientStart
-              : AppColors.border.withAlpha((0.3 * 255).round()),
-          width: 1.5,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+      final borderRadius = BorderRadius.circular(24);
+      final horizontal = isFilter ? 16.0 : 16.0;
+
+      return InkWell(
+        borderRadius: borderRadius,
+        onTap: () => onSelected(true),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontal,
+            vertical: isFilter ? 12 : 12,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            color: selected ? null : AppColors.inputBackground,
+            gradient: selected
+                ? const LinearGradient(
+                    colors: [
+                      AppColors.blueGradientStart,
+                      AppColors.blueGradientEnd,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            border: Border.all(
+              color: selected
+                  ? Colors.transparent
+                  : AppColors.border.withAlpha((0.25 * 255).round()),
+              width: selected ? 0 : 1.5,
+            ),
+          ),
+          child: Text(
+            label,
+            style: chipLabelStyle?.copyWith(
+              color: selected ? Colors.white : AppColors.textPrimary,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+            ),
+          ),
         ),
       );
-
-      return chip;
     }
 
-    return GradientBackground.plan(
+
+    return GradientBackground.home(
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: const Text('Generate Plan'),
-          leading: BackButton(
-            onPressed: widget.onBack ?? () => Navigator.maybePop(context),
-          ),
+          leading: BackButton(onPressed: () => widget.onBack ?? Navigator.maybePop(context)),
         ),
-        extendBodyBehindAppBar: true,
         body: SafeArea(
-          bottom: false,
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               horizontal: Spacing.lg,
-              vertical: Spacing.xl,
+              vertical: Spacing.lg,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -617,7 +615,7 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                 FilledButton(
                   onPressed: _generate,
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.planGradientStart,
+                    backgroundColor: AppColors.blueGradientStart,
                     foregroundColor: AppColors.textPrimary,
                     minimumSize: const Size.fromHeight(56),
                     shape: RoundedRectangleBorder(
