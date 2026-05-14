@@ -537,8 +537,8 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                                       FilledButton.tonal(
                                         onPressed: _pickEndDate,
                                         style: FilledButton.styleFrom(
-                                          backgroundColor: AppColors.card,
-                                          foregroundColor: AppColors.primary,
+                                          backgroundColor: AppColors.planGradientStart,
+                                          foregroundColor: AppColors.textPrimary,
                                           minimumSize: const Size(120, 48),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(24),
@@ -617,6 +617,8 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                 FilledButton(
                   onPressed: _generate,
                   style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.planGradientStart,
+                    foregroundColor: AppColors.textPrimary,
                     minimumSize: const Size.fromHeight(56),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
@@ -633,7 +635,8 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                   onPressed: widget.onBack ?? () => Navigator.maybePop(context),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(56),
-                    side: BorderSide(color: AppColors.border.withAlpha((0.35 * 255).round())),
+                    foregroundColor: AppColors.textPrimary,
+                    side: BorderSide(color: AppColors.border.withAlpha((0.2 * 255).round())),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
                     ),

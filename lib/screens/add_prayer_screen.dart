@@ -36,11 +36,11 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
   };
 
   final Map<String, Color> _categoryColors = {
-    'Personal': Colors.pink,
-    'Family': Colors.purple,
-    'Friends': Colors.blue,
-    'Work': Colors.amber,
-    'World': Colors.teal,
+    'Personal': const Color(0xFFF472B6), // Soft pink
+    'Family': const Color(0xFFC084FC), // Soft purple
+    'Friends': const Color(0xFF60A5FA), // Soft blue
+    'Work': const Color(0xFFFB923C), // Soft amber
+    'World': const Color(0xFF2DD4BF), // Soft teal
   };
 
   @override
@@ -255,6 +255,10 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                     backgroundColor: categoryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                   child: _isSubmitting
                       ? const SizedBox(
@@ -278,6 +282,9 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
                   onPressed: _isSubmitting ? null : () => Navigator.maybePop(context),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: Spacing.md),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                   child: const Text('Cancel'),
                 ),

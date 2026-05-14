@@ -94,7 +94,11 @@ class BiblePlanScreen extends StatelessWidget {
                                     horizontal: Spacing.xl,
                                     vertical: Spacing.md,
                                   ),
-                                  backgroundColor: AppColors.primary,
+                                  backgroundColor: AppColors.homeGradientStart,
+                                  foregroundColor: AppColors.textPrimary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
                                 ),
                                 child: const Text(
                                   'Create Reading Plan',
@@ -262,7 +266,11 @@ class BiblePlanScreen extends StatelessWidget {
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 vertical: Spacing.md),
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: AppColors.homeGradientStart,
+                            foregroundColor: AppColors.textPrimary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
                           child: Text(
                             'Generate New Reading Plan',
@@ -270,7 +278,7 @@ class BiblePlanScreen extends StatelessWidget {
                                 .textTheme
                                 .labelLarge
                                 ?.copyWith(
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
@@ -462,11 +470,14 @@ class BiblePlanScreen extends StatelessWidget {
                                                     },
                                               style: FilledButton.styleFrom(
                                                 backgroundColor: day.completed
-                                                    ? Colors.grey.shade300
-                                                    : AppColors.primary,
+                                                    ? AppColors.secondary
+                                                    : AppColors.homeGradientStart,
                                                 foregroundColor: day.completed
                                                     ? AppColors.textSecondary
-                                                    : Colors.white,
+                                                    : AppColors.textPrimary,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(20),
+                                                ),
                                                 padding:
                                                     const EdgeInsets.symmetric(
                                                   vertical: Spacing.md,

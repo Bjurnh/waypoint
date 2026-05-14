@@ -297,12 +297,16 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                   },
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: Spacing.md),
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: AppColors.prayerGradientStart,
+                    foregroundColor: AppColors.textPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                   child: Text(
                     'Save Changes',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
