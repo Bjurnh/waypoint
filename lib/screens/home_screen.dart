@@ -21,36 +21,6 @@ class HomeScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(Spacing.md),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.md, vertical: Spacing.sm),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.95),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.check_circle, color: Colors.green, size: 16),
-                      SizedBox(width: Spacing.sm),
-                      Text(
-                        'Synced',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
         body: ListView(
           padding: const EdgeInsets.symmetric(
