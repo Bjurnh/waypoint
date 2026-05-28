@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:waypoint_app/services/hive_service.dart';
+import 'package:waypoint/services/hive_service.dart';
 import '../models/day_reading.dart';
+import '../models/habit.dart';
 import '../models/prayer_entry.dart';
 import '../models/plan_config.dart';
 import '../models/plan_models.dart' as plan_models;
 import '../services/notification_service.dart';
+import '../theme/app_colors.dart';
 
 /// A simple scheduled reminder for notifications
 class Reminder {
@@ -47,6 +49,7 @@ class AppState extends ChangeNotifier {
   final HiveService _hive = HiveService();
 
   List<DayReading> readings = [];
+  List<Habit> habits = [];
   List<PrayerEntry> prayers = [];
   PlanConfig? config;
   int currentStreak = 0;
@@ -83,6 +86,7 @@ class AppState extends ChangeNotifier {
     readings = _hive.readingsBox.values.toList();
     prayers = _hive.prayersBox.values.toList();
     config = _hive.configBox.isNotEmpty ? _hive.configBox.values.first : null;
+    await loadHabits();
     _recalculate();
     notifyListeners();
   }
@@ -109,6 +113,109 @@ class AppState extends ChangeNotifier {
     if (config != null) {
       await box.put('config', config!);
     }
+  }
+
+  Future<void> loadHabits() async {
+    habits = _hive.habitsBox.values.toList();
+    if (habits.isEmpty) {
+      habits = _defaultHabits();
+      await saveHabits();
+    }
+  }
+
+  Future<void> saveHabits() async {
+    final box = _hive.habitsBox;
+    await box.clear();
+    for (var habit in habits) {
+      await box.put(habit.id, habit);
+    }
+  }
+
+  Future<void> toggleHabitCompletion(String id) async {
+    final index = habits.indexWhere((h) => h.id == id);
+    if (index == -1) return;
+
+    final habit = habits[index];
+    final completed = !habit.completedToday;
+    final weekData = List<bool>.from(habit.weekData);
+    if (weekData.isNotEmpty) {
+      weekData[weekData.length - 1] = completed;
+    }
+
+    final updatedHabit = habit.copyWith(
+      completedToday: completed,
+      streak: completed ? habit.streak + 1 : (habit.streak > 0 ? habit.streak - 1 : 0),
+      weekData: weekData,
+    );
+
+    habits[index] = updatedHabit;
+    await saveHabits();
+    notifyListeners();
+  }
+
+  List<Habit> _defaultHabits() {
+    return [
+      Habit(
+        id: 'habit_read_bible',
+        title: 'Read Bible',
+        subtitle: 'Daily 15 min',
+        category: 'Reading',
+        progress: 0.6,
+        streak: 7,
+        colorValue: AppColors.blueGradientStart.value,
+        iconCodePoint: Icons.import_contacts.codePoint,
+        iconFontFamily: Icons.import_contacts.fontFamily ?? 'MaterialIcons',
+        iconFontPackage: Icons.import_contacts.fontPackage,
+        completedToday: false,
+        weekData: [true, true, false, true, true, false, false],
+        completionRate: 0.62,
+      ),
+      Habit(
+        id: 'habit_prayer',
+        title: 'Prayer',
+        subtitle: 'Morning & Night',
+        category: 'Prayer',
+        progress: 0.8,
+        streak: 14,
+        colorValue: AppColors.pinkGradientStart.value,
+        iconCodePoint: Icons.favorite.codePoint,
+        iconFontFamily: Icons.favorite.fontFamily ?? 'MaterialIcons',
+        iconFontPackage: Icons.favorite.fontPackage,
+        completedToday: true,
+        weekData: [true, true, true, true, true, true, false],
+        completionRate: 0.86,
+      ),
+      Habit(
+        id: 'habit_meditation',
+        title: 'Meditation',
+        subtitle: 'Evening wind-down',
+        category: 'Meditation',
+        progress: 0.5,
+        streak: 3,
+        colorValue: AppColors.greenGradientStart.value,
+        iconCodePoint: Icons.psychology.codePoint,
+        iconFontFamily: Icons.psychology.fontFamily ?? 'MaterialIcons',
+        iconFontPackage: Icons.psychology.fontPackage,
+        completedToday: false,
+        weekData: [true, false, true, false, false, true, false],
+        completionRate: 0.43,
+      ),
+      Habit(
+        id: 'habit_journal',
+        title: 'Journal',
+        subtitle: 'Reflections',
+        category: 'Journaling',
+        progress: 0.7,
+        streak: 5,
+        colorValue: AppColors.purpleGradientStart.value,
+        iconCodePoint: Icons.edit_note.codePoint,
+        iconFontFamily: Icons.edit_note.fontFamily ?? 'MaterialIcons',
+        iconFontPackage: Icons.edit_note.fontPackage,
+        completedToday: true,
+        weekData: [true, true, false, true, true, true, false],
+        completionRate: 0.71,
+      ),
+    ];
   }
 
   /// Adds a new prayer entry and persists to Hive.

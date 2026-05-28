@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:waypoint_app/screens/add_prayer_screen.dart';
+import 'package:waypoint/screens/add_prayer_screen.dart';
 
 import 'state/app_state.dart';
 import 'services/hive_service.dart';

@@ -1,4 +1,4 @@
-package com.example.waypoint_app
+package com.aidrian.waypoint
 
 import io.flutter.embedding.android.FlutterActivity
 

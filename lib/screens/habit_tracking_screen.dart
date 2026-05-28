@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../state/app_state.dart';
+import '../models/habit.dart';
 import '../widgets/gradient_background.dart';
 import '../widgets/modern_appbar.dart';
 import '../widgets/search_filter_bar.dart';
@@ -25,100 +28,31 @@ class DailyAction {
 
 class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
   String _searchQuery = '';
-  String _selectedFilter = 'all';
-  late Map<int, bool> _todayCompletion;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize today's completion tracking
-    _todayCompletion = {
-      1: false,
-      2: true,
-      3: false,
-      4: true,
-    };
-  }
+  String _selectedFilter = 'All';
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> allHabits = [
-      {
-        'id': 1,
-        'title': 'Read Bible',
-        'subtitle': 'Daily 15 min',
-        'category': 'reading',
-        'progress': 0.6,
-        'streak': 7,
-        'color': AppColors.blueGradientStart,
-        'icon': Icons.import_contacts,
-        'weekData': [true, true, false, true, true, false, false],
-        'completionRate': 0.62,
-      },
-      {
-        'id': 2,
-        'title': 'Prayer',
-        'subtitle': 'Morning & Night',
-        'category': 'spiritual',
-        'progress': 0.8,
-        'streak': 14,
-        'color': AppColors.pinkGradientStart,
-        'icon': Icons.favorite,
-        'weekData': [true, true, true, true, true, true, false],
-        'completionRate': 0.86,
-      },
-      {
-        'id': 3,
-        'title': 'Meditation',
-        'subtitle': 'Evening wind-down',
-        'category': 'wellness',
-        'progress': 0.5,
-        'streak': 3,
-        'color': AppColors.greenGradientStart,
-        'icon': Icons.psychology,
-        'weekData': [true, false, true, false, false, true, false],
-        'completionRate': 0.43,
-      },
-      {
-        'id': 4,
-        'title': 'Journal',
-        'subtitle': 'Reflections',
-        'category': 'reflection',
-        'progress': 0.7,
-        'streak': 5,
-        'color': AppColors.purpleGradientStart,
-        'icon': Icons.edit_note,
-        'weekData': [true, true, false, true, true, true, false],
-        'completionRate': 0.71,
-      },
-    ];
+    final appState = Provider.of<AppState>(context);
+    final List<Habit> allHabits = appState.habits;
 
     // Filter habits based on selection
-    List<Map<String, dynamic>> filteredHabits = allHabits;
+    List<Habit> filteredHabits = allHabits;
 
-    if (_selectedFilter != 'all') {
+    if (_selectedFilter != 'All') {
       filteredHabits = filteredHabits
-          .where((h) =>
-              (h['category'] as String).toLowerCase() ==
-              _selectedFilter.toLowerCase())
+          .where((h) => h.category.toLowerCase() == _selectedFilter.toLowerCase())
           .toList();
     }
 
     if (_searchQuery.isNotEmpty) {
       filteredHabits = filteredHabits
           .where((h) =>
-              (h['title'] as String)
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()) ||
-              (h['subtitle'] as String)
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()))
+              h.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              h.subtitle.toLowerCase().contains(_searchQuery.toLowerCase()))
           .toList();
     }
 
-    final completedToday = _todayCompletion.values
-        .where((completed) => completed)
-        .length;
+    final completedToday = allHabits.where((habit) => habit.completedToday).length;
 
     return GradientBackground.habit(
       child: Scaffold(
@@ -133,7 +67,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
             SliverPadding(
               padding: const EdgeInsets.all(Spacing.md),
               sliver: SliverToBoxAdapter(
-                child: SearchFilterBar(
+                child: SearchFilterBar.habit(
                   onSearchChanged: (query) {
                     setState(() {
                       _searchQuery = query;
@@ -144,7 +78,6 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                       _selectedFilter = filter;
                     });
                   },
-                  filters: const ['all', 'reading', 'spiritual', 'wellness', 'reflection'],
                   selectedFilter: _selectedFilter,
                 ),
               ),
@@ -178,7 +111,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${((completedToday / _todayCompletion.length) * 100).toStringAsFixed(0)}%',
+                                '${(allHabits.isEmpty ? 0 : ((completedToday / allHabits.length) * 100)).toStringAsFixed(0)}%',
                                 style: const TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.w700,
@@ -217,7 +150,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                                     ),
                                   ),
                                   Text(
-                                    'of ${_todayCompletion.length}',
+                                    'of ${allHabits.length}',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.white70,
@@ -296,28 +229,24 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                         ),
                       ),
                     )
-                  : SliverList.builder(
-                      itemCount: filteredHabits.length,
-                      itemBuilder: (c, i) {
-                        final h = filteredHabits[i];
-                        final habitId = h['id'] as int;
-                        final isCompletedToday =
-                            _todayCompletion[habitId] ?? false;
+                  : SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (c, i) {
+                          final habit = filteredHabits[i];
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: Spacing.md),
-                          child: _HabitCard(
-                            habit: h,
-                            isCompletedToday: isCompletedToday,
-                            onToggleComplete: () {
-                              setState(() {
-                                _todayCompletion[habitId] =
-                                    !_todayCompletion[habitId]!;
-                              });
-                            },
-                          ),
-                        );
-                      },
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: Spacing.md),
+                            child: _HabitCard(
+                              habit: habit,
+                              isCompletedToday: habit.completedToday,
+                              onToggleComplete: () {
+                                appState.toggleHabitCompletion(habit.id);
+                              },
+                            ),
+                          );
+                        },
+                        childCount: filteredHabits.length,
+                      ),
                     ),
             ),
           ],
@@ -328,19 +257,19 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
 
   /// Build habit comparison bar chart
   BarChartData _buildHabitComparisonChart(
-    List<Map<String, dynamic>> habits,
+    List<Habit> habits,
   ) {
     final barGroups = <BarChartGroupData>[];
 
     for (int i = 0; i < habits.length && i < 7; i++) {
       final habit = habits[i];
-      final completionRate = (habit['completionRate'] as double) * 100;
+      final completionRate = habit.completionRate * 100;
       
       barGroups.add(
         ChartStyles.createBarGroup(
           x: i,
           y: completionRate.clamp(0, 100),
-          color: habit['color'] as Color,
+          color: habit.color,
         ),
       );
     }
@@ -352,7 +281,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
   }
 }
 class _HabitCard extends StatefulWidget {
-  final Map<String, dynamic> habit;
+  final Habit habit;
   final bool isCompletedToday;
   final VoidCallback onToggleComplete;
 
@@ -413,9 +342,9 @@ class _HabitCardState extends State<_HabitCard>
 
   @override
   Widget build(BuildContext context) {
-    final weekData = widget.habit['weekData'] as List<bool>;
-    final completionRate = widget.habit['completionRate'] as double;
-    final color = widget.habit['color'] as Color;
+    final weekData = widget.habit.weekData;
+    final completionRate = widget.habit.completionRate;
+    final color = widget.habit.color;
 
     return GradientCard(
       child: Column(
@@ -429,7 +358,7 @@ class _HabitCardState extends State<_HabitCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.habit['title'] as String,
+                      widget.habit.title,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -438,7 +367,7 @@ class _HabitCardState extends State<_HabitCard>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      widget.habit['subtitle'] as String,
+                      widget.habit.subtitle,
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.mutedForeground,
@@ -479,7 +408,7 @@ class _HabitCardState extends State<_HabitCard>
                             )
                           : Center(
                               child: Icon(
-                                widget.habit['icon'] as IconData,
+                                widget.habit.icon,
                                 color: AppColors.mutedForeground,
                                 size: 20,
                               ),
@@ -500,7 +429,7 @@ class _HabitCardState extends State<_HabitCard>
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '🔥 ${widget.habit['streak']} day streak',
+              '🔥 ${widget.habit.streak} day streak',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,

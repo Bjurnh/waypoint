@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:waypoint_app/models/day_reading.dart';
+import 'package:waypoint/models/day_reading.dart';
 import 'package:provider/provider.dart';
-import 'package:waypoint_app/state/app_state.dart';
+import 'package:waypoint/state/app_state.dart';
 import '../models/plan_config.dart';
 import '../theme/app_colors.dart';
 import '../utils/spacing.dart';
