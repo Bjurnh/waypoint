@@ -263,8 +263,8 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
 
     for (int i = 0; i < habits.length && i < 7; i++) {
       final habit = habits[i];
-      final completionRate = habit.completionRate * 100;
-      
+      final completionRate = habit.computedCompletionRate * 100;
+
       barGroups.add(
         ChartStyles.createBarGroup(
           x: i,
@@ -342,8 +342,10 @@ class _HabitCardState extends State<_HabitCard>
 
   @override
   Widget build(BuildContext context) {
-    final weekData = widget.habit.weekData;
-    final completionRate = widget.habit.completionRate;
+    final weekData = widget.habit.weekData.length == 7
+        ? widget.habit.weekData
+        : List<bool>.filled(7, false);
+    final completionRate = widget.habit.computedCompletionRate;
     final color = widget.habit.color;
 
     return GradientCard(

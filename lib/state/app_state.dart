@@ -116,9 +116,24 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> loadHabits() async {
-    habits = _hive.habitsBox.values.toList();
-    if (habits.isEmpty) {
+    final loadedHabits = _hive.habitsBox.values.toList();
+    if (loadedHabits.isEmpty) {
       habits = _defaultHabits();
+      await saveHabits();
+      return;
+    }
+
+    final today = DateTime.now();
+    var changed = false;
+    habits = loadedHabits.map((habit) {
+      final normalizedHabit = habit.normalizedForDate(today);
+      if (!identical(habit, normalizedHabit)) {
+        changed = true;
+      }
+      return normalizedHabit;
+    }).toList();
+
+    if (changed) {
       await saveHabits();
     }
   }
@@ -135,17 +150,25 @@ class AppState extends ChangeNotifier {
     final index = habits.indexWhere((h) => h.id == id);
     if (index == -1) return;
 
-    final habit = habits[index];
+    final now = DateTime.now();
+    final habit = habits[index].normalizedForDate(now);
     final completed = !habit.completedToday;
     final weekData = List<bool>.from(habit.weekData);
-    if (weekData.isNotEmpty) {
-      weekData[weekData.length - 1] = completed;
+    if (weekData.length != 7) {
+      for (int i = weekData.length; i < 7; i++) {
+        weekData.add(false);
+      }
     }
+    weekData[weekData.length - 1] = completed;
 
+    final completionRate = weekData.where((value) => value).length / weekData.length;
     final updatedHabit = habit.copyWith(
       completedToday: completed,
       streak: completed ? habit.streak + 1 : (habit.streak > 0 ? habit.streak - 1 : 0),
       weekData: weekData,
+      completionRate: completionRate,
+      progress: completionRate,
+      lastUpdatedEpoch: now.millisecondsSinceEpoch,
     );
 
     habits[index] = updatedHabit;
@@ -169,6 +192,7 @@ class AppState extends ChangeNotifier {
         completedToday: false,
         weekData: [true, true, false, true, true, false, false],
         completionRate: 0.62,
+        lastUpdatedEpoch: DateTime.now().millisecondsSinceEpoch,
       ),
       Habit(
         id: 'habit_prayer',
@@ -184,6 +208,7 @@ class AppState extends ChangeNotifier {
         completedToday: true,
         weekData: [true, true, true, true, true, true, false],
         completionRate: 0.86,
+        lastUpdatedEpoch: DateTime.now().millisecondsSinceEpoch,
       ),
       Habit(
         id: 'habit_meditation',
@@ -199,6 +224,7 @@ class AppState extends ChangeNotifier {
         completedToday: false,
         weekData: [true, false, true, false, false, true, false],
         completionRate: 0.43,
+        lastUpdatedEpoch: DateTime.now().millisecondsSinceEpoch,
       ),
       Habit(
         id: 'habit_journal',
@@ -214,6 +240,7 @@ class AppState extends ChangeNotifier {
         completedToday: true,
         weekData: [true, true, false, true, true, true, false],
         completionRate: 0.71,
+        lastUpdatedEpoch: DateTime.now().millisecondsSinceEpoch,
       ),
     ];
   }

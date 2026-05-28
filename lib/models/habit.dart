@@ -15,6 +15,7 @@ class Habit {
   bool completedToday;
   List<bool> weekData;
   double completionRate;
+  int lastUpdatedEpoch;
 
   Habit({
     required this.id,
@@ -30,6 +31,7 @@ class Habit {
     this.completedToday = false,
     required this.weekData,
     required this.completionRate,
+    required this.lastUpdatedEpoch,
   });
 
   IconData get icon => IconData(
@@ -37,6 +39,64 @@ class Habit {
         fontFamily: iconFontFamily,
         fontPackage: iconFontPackage,
       );
+
+  DateTime get lastUpdated => DateTime.fromMillisecondsSinceEpoch(lastUpdatedEpoch);
+
+  double get computedCompletionRate {
+    if (weekData.isEmpty) return 0.0;
+    return weekData.where((completed) => completed).length / weekData.length;
+  }
+
+  static List<bool> _normalizeWeekData(List<bool> data) {
+    if (data.length == 7) return List<bool>.from(data);
+    if (data.length > 7) {
+      return data.sublist(data.length - 7);
+    }
+    return [for (int i = 0; i < 7 - data.length; i++) false, ...data];
+  }
+
+  Habit normalizedForDate(DateTime currentDate) {
+    final normalizedToday = DateTime(currentDate.year, currentDate.month, currentDate.day);
+    final normalizedTodayEpoch = normalizedToday.millisecondsSinceEpoch;
+    final previousUpdate = DateTime(
+      lastUpdated.year,
+      lastUpdated.month,
+      lastUpdated.day,
+    );
+    final diffDays = normalizedToday.difference(previousUpdate).inDays;
+    var normalizedWeekData = _normalizeWeekData(weekData);
+
+    if (diffDays <= 0 && normalizedWeekData.length == 7) {
+      final expectedCompletionRate = computedCompletionRate;
+      final expectedCompletedToday = normalizedWeekData.last;
+      if (completedToday == expectedCompletedToday && completionRate == expectedCompletionRate) {
+        return this;
+      }
+      return copyWith(
+        completedToday: expectedCompletedToday,
+        completionRate: expectedCompletionRate,
+        weekData: normalizedWeekData,
+      );
+    }
+
+    if (diffDays >= 7) {
+      normalizedWeekData = List<bool>.filled(7, false);
+    } else if (diffDays > 0) {
+      final shifted = List<bool>.filled(7, false);
+      for (int i = 0; i < 7 - diffDays; i++) {
+        shifted[i] = normalizedWeekData[i + diffDays];
+      }
+      normalizedWeekData = shifted;
+    }
+
+    final normalizedCompletedToday = normalizedWeekData.last;
+    return copyWith(
+      completedToday: normalizedCompletedToday,
+      weekData: normalizedWeekData,
+      completionRate: normalizedWeekData.where((completed) => completed).length / normalizedWeekData.length,
+      lastUpdatedEpoch: normalizedTodayEpoch,
+    );
+  }
 
   Color get color => Color(colorValue);
 
@@ -54,6 +114,7 @@ class Habit {
     bool? completedToday,
     List<bool>? weekData,
     double? completionRate,
+    int? lastUpdatedEpoch,
   }) {
     return Habit(
       id: id ?? this.id,
@@ -69,6 +130,7 @@ class Habit {
       completedToday: completedToday ?? this.completedToday,
       weekData: weekData ?? this.weekData,
       completionRate: completionRate ?? this.completionRate,
+      lastUpdatedEpoch: lastUpdatedEpoch ?? this.lastUpdatedEpoch,
     );
   }
 
@@ -87,6 +149,7 @@ class Habit {
       'completedToday': completedToday,
       'weekData': weekData,
       'completionRate': completionRate,
+      'lastUpdatedEpoch': lastUpdatedEpoch,
     };
   }
 
@@ -105,6 +168,7 @@ class Habit {
       completedToday: m['completedToday'] as bool? ?? false,
       weekData: List<bool>.from(m['weekData'] as List<dynamic>),
       completionRate: (m['completionRate'] as num).toDouble(),
+      lastUpdatedEpoch: m['lastUpdatedEpoch'] as int? ?? DateTime.now().millisecondsSinceEpoch,
     );
   }
 }
@@ -115,20 +179,42 @@ class HabitAdapter extends TypeAdapter<Habit> {
 
   @override
   Habit read(BinaryReader reader) {
+    final id = reader.readString();
+    final title = reader.readString();
+    final subtitle = reader.readString();
+    final category = reader.readString();
+    final progress = reader.readDouble();
+    final streak = reader.readInt();
+    final colorValue = reader.readInt();
+    final iconCodePoint = reader.readInt();
+    final iconFontFamily = reader.readString();
+    final iconFontPackage = reader.readBool() ? reader.readString() : null;
+    final completedToday = reader.readBool();
+    final weekData = List<bool>.from(reader.readList());
+    final completionRate = reader.readDouble();
+
+    var lastUpdatedEpoch = DateTime.now().millisecondsSinceEpoch;
+    try {
+      lastUpdatedEpoch = reader.readInt();
+    } catch (_) {
+      // Existing habit data may not include this field yet.
+    }
+
     return Habit(
-      id: reader.readString(),
-      title: reader.readString(),
-      subtitle: reader.readString(),
-      category: reader.readString(),
-      progress: reader.readDouble(),
-      streak: reader.readInt(),
-      colorValue: reader.readInt(),
-      iconCodePoint: reader.readInt(),
-      iconFontFamily: reader.readString(),
-      iconFontPackage: reader.readBool() ? reader.readString() : null,
-      completedToday: reader.readBool(),
-      weekData: List<bool>.from(reader.readList()),
-      completionRate: reader.readDouble(),
+      id: id,
+      title: title,
+      subtitle: subtitle,
+      category: category,
+      progress: progress,
+      streak: streak,
+      colorValue: colorValue,
+      iconCodePoint: iconCodePoint,
+      iconFontFamily: iconFontFamily,
+      iconFontPackage: iconFontPackage,
+      completedToday: completedToday,
+      weekData: weekData,
+      completionRate: completionRate,
+      lastUpdatedEpoch: lastUpdatedEpoch,
     );
   }
 
@@ -150,5 +236,6 @@ class HabitAdapter extends TypeAdapter<Habit> {
     writer.writeBool(obj.completedToday);
     writer.writeList(obj.weekData);
     writer.writeDouble(obj.completionRate);
+    writer.writeInt(obj.lastUpdatedEpoch);
   }
 }
