@@ -8,6 +8,7 @@ import '../widgets/modern_appbar.dart';
 import '../widgets/search_filter_bar.dart';
 import '../widgets/gradient_card.dart';
 import '../theme/app_colors.dart';
+import '../utils/icon_map.dart';
 import '../utils/spacing.dart';
 import '../utils/chart_styles.dart';
 
@@ -410,7 +411,7 @@ class _HabitCardState extends State<_HabitCard>
                             )
                           : Center(
                               child: Icon(
-                                widget.habit.icon,
+                                kIconMap[widget.habit.iconKey] ?? Icons.help_outline,
                                 color: AppColors.mutedForeground,
                                 size: 20,
                               ),
