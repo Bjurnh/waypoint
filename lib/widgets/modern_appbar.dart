@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
+
 
 /// A modern AppBar with gradient icon container, title, and subtitle.
 /// Matches React's header design: "w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full"
@@ -146,6 +148,11 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      systemOverlayStyle: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
       scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,  // Hide automatic back button
       leading: showBackButton

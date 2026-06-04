@@ -232,6 +232,25 @@ class _ReadingCardState extends State<_ReadingCard>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
+  String _formatMonthDayYear(DateTime date) {
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    final month = monthNames[date.month - 1];
+    return '$month ${date.day}, ${date.year}';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -312,7 +331,7 @@ class _ReadingCardState extends State<_ReadingCard>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Day ${widget.index + 1} • ${widget.reading.date.toIso8601String().split('T').first}',
+                    'Day ${widget.index + 1} reading • ${_formatMonthDayYear(widget.reading.date)}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: widget.reading.completed
                               ? AppColors.mutedForeground

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:waypoint/services/hive_service.dart';
 import '../models/day_reading.dart';
 import '../models/habit.dart';
 import '../models/prayer_entry.dart';
 import '../models/plan_config.dart';
 import '../models/plan_models.dart' as plan_models;
+import '../data/reading_plans/bible_in_year_plan.dart';
 import '../services/notification_service.dart';
+
 import '../theme/app_colors.dart';
+
 
 /// A simple scheduled reminder for notifications
 class Reminder {
@@ -48,12 +52,45 @@ class Reminder {
 class AppState extends ChangeNotifier {
   final HiveService _hive = HiveService();
 
+  // ------------------------------------------------------------------
+  // Profile (local-only for now)
+  // ------------------------------------------------------------------
+  String? displayName;
+
+  String get effectiveDisplayName => (displayName?.trim().isNotEmpty ?? false)
+      ? displayName!.trim()
+      : 'Prayer Warrior';
+
+  static const String _profileDisplayNameKey = 'profile_display_name';
+
+  Future<void> loadProfileDefaultsIfNeeded() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(_profileDisplayNameKey);
+    if (stored != null && stored.trim().isNotEmpty) {
+      displayName = stored.trim();
+    }
+  }
+
+  Future<void> saveProfile({required String displayName}) async {
+    final normalized = displayName.trim();
+    this.displayName = normalized.isNotEmpty ? normalized : null;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_profileDisplayNameKey, this.displayName ?? '');
+
+    notifyListeners();
+  }
+
+
+
+
   List<DayReading> readings = [];
   List<Habit> habits = [];
   List<PrayerEntry> prayers = [];
   PlanConfig? config;
   int currentStreak = 0;
   double spiritualScore = 0.0;
+
 
   // additional state used by screens
   final List<Reminder> _reminders = [];
@@ -69,10 +106,10 @@ class AppState extends ChangeNotifier {
   /// the JS/TS version of the app and is distinct from the Hive-backed
   /// [config] above.
   plan_models.PlanConfig generatedPlanConfig = plan_models.PlanConfig(
-    timeFrame: 30,
+    timeFrame: 365,
     startDate: DateTime.now(),
     dailyMinutes: 15,
-    readingStyle: 'mixed',
+    readingStyle: 'bibleInYear',
   );
 
   /// Convenience getter used by some screens so they don't have to know which
@@ -81,7 +118,18 @@ class AppState extends ChangeNotifier {
 
   AppState();
 
+  /// Save profile details (currently stored in-memory only).
+  ///
+  /// If/when a persisted user profile model is added, wire this method to Hive.
+  // NOTE: saveProfile is defined once above.
+
+
+
   Future<void> loadData() async {
+
+    // Load persisted profile info (so name survives app restarts)
+    await loadProfileDefaultsIfNeeded();
+
     // Note: Hive is already initialized in main(), no need to call init() again
     readings = _hive.readingsBox.values.toList();
     prayers = _hive.prayersBox.values.toList();
@@ -137,6 +185,31 @@ class AppState extends ChangeNotifier {
       await saveHabits();
     }
   }
+
+  /// Ensures habit data reflects "today" (rollover across midnight).
+  /// This fixes cases where the app stays open and UI would otherwise show
+  /// stale [completedToday] / [weekData].
+  Future<void> normalizeHabitsForNow({bool notify = true}) async {
+    if (habits.isEmpty) return;
+
+    final now = DateTime.now();
+    var changed = false;
+
+    final normalized = habits.map((habit) {
+      final normalizedHabit = habit.normalizedForDate(now);
+      if (!identical(habit, normalizedHabit)) {
+        changed = true;
+      }
+      return normalizedHabit;
+    }).toList();
+
+    if (!changed) return;
+
+    habits = normalized;
+    await saveHabits();
+    if (notify) notifyListeners();
+  }
+
 
   Future<void> saveHabits() async {
     final box = _hive.habitsBox;
@@ -287,20 +360,43 @@ class AppState extends ChangeNotifier {
 
   /// Generates a new reading plan based on the provided configuration.
   Future<void> generatePlan(plan_models.PlanConfig config) async {
-    generatedPlanConfig = config;
+    if (config.readingStyle == 'bibleInYear') {
+      final planStartDate = config.startDate;
+      readings = createBibleInYearPlan(startDate: planStartDate);
+      generatedPlanConfig = plan_models.PlanConfig(
+        timeFrame: 365,
+        startDate: planStartDate,
+        dailyMinutes: config.dailyMinutes,
+        readingStyle: config.readingStyle,
+        mode: config.mode,
+        lastBook: config.lastBook,
+        lastChapter: config.lastChapter,
+        lastVerse: config.lastVerse,
+        targetType: config.targetType,
+        targetEndDate: config.targetEndDate,
+      );
 
-    // Convert to storage model
-    this.config = PlanConfig(
-      length: config.timeFrame,
-      startDate: config.startDate,
-      style: config.readingStyle,
-    );
+      this.config = PlanConfig(
+        length: 365,
+        startDate: planStartDate,
+        style: config.readingStyle,
+      );
+    } else {
+      generatedPlanConfig = config;
 
-    final chapters = config.mode == plan_models.PlanMode.continueCurrent
-        ? _getRemainingBibleChapters(config)
-        : _getBibleChapters(config.readingStyle);
+      // Convert to storage model
+      this.config = PlanConfig(
+        length: config.timeFrame,
+        startDate: config.startDate,
+        style: config.readingStyle,
+      );
 
-    readings = _buildReadings(chapters, config.timeFrame, config.startDate);
+      final chapters = config.mode == plan_models.PlanMode.continueCurrent
+          ? _getRemainingBibleChapters(config)
+          : _getBibleChapters(config.readingStyle);
+
+      readings = _buildReadings(chapters, config.timeFrame, config.startDate);
+    }
 
     await saveReadings();
     await saveConfig();
@@ -559,58 +655,8 @@ class AppState extends ChangeNotifier {
       }
     }
 
-    // For mixed style, interleave Old Testament and New Testament chapters
-    if (readingStyle == 'mixed') {
-      return _createMixedOrderChapters(chapters);
-    }
-
-    // For sequential style, return chapters in order
+    // Only sequential or Bible-in-a-Year plans are supported now.
     return chapters;
-  }
-
-  List<plan_models.BibleChapter> _createMixedOrderChapters(List<plan_models.BibleChapter> sequentialChapters) {
-    final oldTestament = <plan_models.BibleChapter>[];
-    final newTestament = <plan_models.BibleChapter>[];
-
-    // Split chapters into Old and New Testament
-    // Old Testament: Genesis to Malachi (39 books)
-    // New Testament: Matthew to Revelation (27 books)
-    const oldTestamentBooks = [
-      'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy',
-      'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel',
-      '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles',
-      'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalms',
-      'Proverbs', 'Ecclesiastes', 'Song of Solomon',
-      'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel',
-      'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah',
-      'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah',
-      'Haggai', 'Zechariah', 'Malachi'
-    ];
-
-    for (final chapter in sequentialChapters) {
-      if (oldTestamentBooks.contains(chapter.book)) {
-        oldTestament.add(chapter);
-      } else {
-        newTestament.add(chapter);
-      }
-    }
-
-    // Interleave Old and New Testament chapters
-    final mixedChapters = <plan_models.BibleChapter>[];
-    final maxLength = oldTestament.length > newTestament.length
-        ? oldTestament.length
-        : newTestament.length;
-
-    for (var i = 0; i < maxLength; i++) {
-      if (i < oldTestament.length) {
-        mixedChapters.add(oldTestament[i]);
-      }
-      if (i < newTestament.length) {
-        mixedChapters.add(newTestament[i]);
-      }
-    }
-
-    return mixedChapters;
   }
 
   int _estimateChapterVerseCount(String book, int chapter) {

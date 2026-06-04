@@ -1,37 +1,10 @@
-# Lazy Load Storage Implementation Plan
+# TODO
 
-## Information Gathered:
-- `lib/main.dart`: Previously blocked app startup with `await StorageService.loadPrayers()` and `await NotificationService.initialize()`
-- `lib/state/app_state.dart`: Loaded all data synchronously in constructor
-- `lib/services/storage_service.dart`: Uses SharedPreferences for persistence
-- `lib/services/notification_service.dart`: Initializes timezone database on startup
+## Status Bar / SafeArea spacing fixes (HomeScreen)
+- [ ] Update `lib/screens/home_screen.dart` to use correct SafeArea handling and remove duplicate top padding.
+- [ ] Remove fixed `topInset + 16` ListView padding that can push content too far down.
+- [ ] Ensure AppBar spacing doesn’t consume extra height (avoid empty AppBar + extendBodyBehindAppBar unless required).
+- [ ] Set a per-screen `SystemUiOverlayStyle` so status bar icons remain readable across light/dark backgrounds.
+- [ ] Keep consistent layout with notches/punch-hole devices by relying on `MediaQuery.padding` only once.
 
-## Plan - COMPLETED:
-- [x] `lib/main.dart`
-  - [x] Remove blocking `await StorageService.loadPrayers()` call
-  - [x] Make notification initialization non-blocking
-  - [x] Add splash/loading screen while services initialize in background
 
-- [x] `lib/state/app_state.dart`
-  - [x] Add `isInitialized` flag to track loading state
-  - [x] Make data loading lazy - load on first access instead of constructor
-  - [x] Add `initialize()` method for explicit initialization when needed
-
-- [x] `lib/widgets/splash_screen.dart` (created new)
-  - [x] Create a simple splash screen widget
-  - [x] Show loading indicator while services initialize
-
-## Dependent Files Edited:
-- `lib/main.dart`
-- `lib/state/app_state.dart`
-- `lib/widgets/splash_screen.dart` (new file)
-
-## Summary of Changes:
-1. **AppState** - Now has lazy loading with `isInitialized` flag and `initialize()` method
-2. **main.dart** - Shows splash screen immediately, initializes services in background
-3. **SplashScreen** - New widget showing app logo and loading indicator
-
-## Expected Improvement:
-- App now shows splash screen immediately (no blocking)
-- Storage and notification initialization happens in background
-- User sees UI faster while data loads in background

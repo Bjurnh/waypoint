@@ -23,6 +23,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
     'Personal',
     'Family',
     'Friends',
+    'Church',
     'Work',
     'World',
   ];
@@ -31,6 +32,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
     'Personal': Icons.person_rounded,
     'Family': Icons.family_restroom_rounded,
     'Friends': Icons.people_rounded,
+    'Church': Icons.church_rounded,
     'Work': Icons.work_rounded,
     'World': Icons.public_rounded,
   };
@@ -39,6 +41,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
     'Personal': const Color(0xFFF472B6), // Soft pink
     'Family': const Color(0xFFC084FC), // Soft purple
     'Friends': const Color(0xFF60A5FA), // Soft blue
+    'Church': const Color(0xFF34D399), // Soft green
     'Work': const Color(0xFFFB923C), // Soft amber
     'World': const Color(0xFF2DD4BF), // Soft teal
   };
@@ -70,6 +73,7 @@ class _AddPrayerScreenState extends State<AddPrayerScreen> {
     Provider.of<AppState>(context, listen: false).addPrayer(
       title: title,
       description: description,
+      category: _selectedCategory,
     );
 
     ScaffoldMessenger.of(context).showSnackBar(

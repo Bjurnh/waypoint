@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/plan_models.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
-import '../utils/spacing.dart';
 import '../widgets/gradient_background.dart';
 import '../widgets/gradient_card.dart';
 
@@ -23,9 +22,9 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
   final _lastVerseCtrl = TextEditingController();
   String _selectedLastBook = 'Genesis';
   DateTime _startDate = DateTime.now();
-  DateTime _targetEndDate = DateTime.now().add(const Duration(days: 90));
-  String _readingStyle = 'mixed';
-  String _selectedTimeFrame = '90';
+  DateTime _targetEndDate = DateTime.now().add(const Duration(days: 365));
+  String _readingStyle = 'bibleInYear';
+  String _selectedTimeFrame = '365';
   String _planMode = 'start';
 
   static const _bibleBooks = <String>[
@@ -192,12 +191,12 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
   Widget build(BuildContext context) {
     final startDateStr = _startDate.toLocal().toIso8601String().split('T')[0];
     final endDateStr = _targetEndDate.toLocal().toIso8601String().split('T')[0];
-    final timeFrameOptions = ['30', '60', '90', '180', '365'];
+    final timeFrameOptions = ['365'];
     final modeLabel = _planMode == 'continue'
         ? 'Continue from current reading'
         : 'Start a new plan from Genesis to Revelation';
 
-    final chipActiveColor = AppColors.blueGradientStart.withAlpha(220);
+    AppColors.blueGradientStart.withAlpha(220);
     final chipLabelStyle = Theme.of(context)
         .textTheme
         .bodyMedium
@@ -417,11 +416,11 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                                         },
                                       ),
                                       optionChip(
-                                        label: 'Mixed (Old & New Testament)',
-                                        selected: _readingStyle == 'mixed',
+                                        label: 'Bible in a Year (OT + NT)',
+                                        selected: _readingStyle == 'bibleInYear',
                                         onSelected: (selected) {
                                           if (selected) {
-                                            setState(() => _readingStyle = 'mixed');
+                                            setState(() => _readingStyle = 'bibleInYear');
                                           }
                                         },
                                       ),
@@ -431,7 +430,7 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                                   Text(
                                     _readingStyle == 'sequential'
                                         ? 'Read chapters in order from Genesis to Revelation'
-                                        : 'Alternate between Old Testament and New Testament chapters',
+                                        : 'A balanced 365-day plan pairing Old Testament passages with New Testament verse ranges',
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium

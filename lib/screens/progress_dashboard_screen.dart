@@ -41,9 +41,10 @@ class ProgressDashboardScreen extends StatelessWidget {
           title: 'Progress Dashboard',
           subtitle: 'Your spiritual journey',
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(Spacing.md),
-          children: [
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(Spacing.md),
+            children: [
             // Summary Cards Grid
             GridView.count(
               crossAxisCount: 2,
@@ -329,6 +330,7 @@ class ProgressDashboardScreen extends StatelessWidget {
 
             const SizedBox(height: Spacing.xl),
           ],
+          ),
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:waypoint/screens/add_prayer_screen.dart';
 
@@ -13,8 +14,18 @@ import 'screens/prayer_log_screen.dart';
 import 'screens/habit_tracking_screen.dart';
 import 'screens/plan_generation_screen.dart';
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Make status bar match screens that draw behind the AppBar.
+  // Android: set transparent background; iOS is handled by platform defaults.
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: Brightness.dark, // iOS (default), safe on Android.
+    ),
+  );
 
   // Initialize Hive and open boxes
   await HiveService().init();
@@ -26,6 +37,7 @@ Future<void> main() async {
 
   runApp(ChangeNotifierProvider(create: (_) => AppState(), child: const WaypointApp()));
 }
+
 
 class WaypointApp extends StatefulWidget {
   const WaypointApp({Key? key}) : super(key: key);

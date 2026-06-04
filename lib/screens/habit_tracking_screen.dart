@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../state/app_state.dart';
+import 'package:provider/provider.dart';
+
 import '../models/habit.dart';
-import '../widgets/gradient_background.dart';
-import '../widgets/modern_appbar.dart';
-import '../widgets/search_filter_bar.dart';
-import '../widgets/gradient_card.dart';
+import '../state/app_state.dart';
 import '../theme/app_colors.dart';
+import '../utils/chart_styles.dart';
 import '../utils/icon_map.dart';
 import '../utils/spacing.dart';
-import '../utils/chart_styles.dart';
+import '../widgets/gradient_background.dart';
+import '../widgets/gradient_card.dart';
+import '../widgets/modern_appbar.dart';
+import '../widgets/search_filter_bar.dart';
+import '../widgets/status_bar_style.dart';
 
 class HabitTrackingScreen extends StatefulWidget {
   const HabitTrackingScreen({super.key});
@@ -23,7 +25,7 @@ class HabitTrackingScreen extends StatefulWidget {
 class DailyAction {
   final DateTime date;
   final bool completed;
-  
+
   DailyAction({required this.date, required this.completed});
 }
 
@@ -32,8 +34,18 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
   String _selectedFilter = 'All';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final appState = Provider.of<AppState>(context, listen: false);
+      await appState.normalizeHabitsForNow();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
+
     final List<Habit> allHabits = appState.habits;
 
     // Filter habits based on selection
@@ -55,211 +67,211 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
 
     final completedToday = allHabits.where((habit) => habit.completedToday).length;
 
-    return GradientBackground.habit(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: ModernAppBar.habit(
-          title: 'Habit Tracker',
-          subtitle: '${filteredHabits.length} habits',
-        ),
-        body: CustomScrollView(
-          slivers: [
-            // Search and Filter Bar
-            SliverPadding(
-              padding: const EdgeInsets.all(Spacing.md),
-              sliver: SliverToBoxAdapter(
-                child: SearchFilterBar.habit(
-                  onSearchChanged: (query) {
-                    setState(() {
-                      _searchQuery = query;
-                    });
-                  },
-                  onFilterSelected: (filter) {
-                    setState(() {
-                      _selectedFilter = filter;
-                    });
-                  },
-                  selectedFilter: _selectedFilter,
+    return StatusBarStyle(
+      child: GradientBackground.habit(
+        
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: true,
+          appBar: ModernAppBar.habit(
+            title: 'Habit Tracker',
+            subtitle: '${filteredHabits.length} habits',
+          ),
+          body: SafeArea(
+            child: CustomScrollView(
+              slivers: [
+                // Search and Filter Bar
+                SliverPadding(
+                  padding: const EdgeInsets.all(Spacing.md),
+                  sliver: SliverToBoxAdapter(
+                    child: SearchFilterBar.habit(
+                      onSearchChanged: (query) {
+                        setState(() {
+                          _searchQuery = query;
+                        });
+                      },
+                      onFilterSelected: (filter) {
+                        setState(() {
+                          _selectedFilter = filter;
+                        });
+                      },
+                      selectedFilter: _selectedFilter,
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // Today's Progress Summary Card
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-              sliver: SliverToBoxAdapter(
-                child: GradientCard(
-                  gradientStart: AppColors.purpleGradientStart,
-                  gradientEnd: AppColors.purpleGradientEnd,
-                  padding: const EdgeInsets.all(Spacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Today's Progress",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: Spacing.md),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                // Today's Progress Summary Card
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                  sliver: SliverToBoxAdapter(
+                    child: GradientCard(
+                      gradientStart: AppColors.purpleGradientStart,
+                      gradientEnd: AppColors.purpleGradientEnd,
+                      padding: const EdgeInsets.all(Spacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${(allHabits.isEmpty ? 0 : ((completedToday / allHabits.length) * 100)).toStringAsFixed(0)}%',
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const Text(
-                                'Completion Rate',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white30,
-                                width: 4,
-                              ),
+                          const Text(
+                            "Today's Progress",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                          ),
+                          const SizedBox(height: Spacing.md),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    completedToday.toString(),
+                                    '${(allHabits.isEmpty ? 0 : ((completedToday / allHabits.length) * 100)).toStringAsFixed(0)}%',
                                     style: const TextStyle(
-                                      fontSize: 24,
+                                      fontSize: 32,
                                       fontWeight: FontWeight.w700,
                                       color: Colors.white,
                                     ),
                                   ),
-                                  Text(
-                                    'of ${allHabits.length}',
-                                    style: const TextStyle(
+                                  const Text(
+                                    'Completion Rate',
+                                    style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.white70,
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white30,
+                                    width: 4,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        completedToday.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        'of ${allHabits.length}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
 
-            // Habit Comparison Chart
-            SliverPadding(
-              padding: const EdgeInsets.all(Spacing.md),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Completion Rates',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    GradientCard(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.md,
-                        vertical: Spacing.lg,
-                      ),
-                      child: SizedBox(
-                        height: ChartStyles.chartHeight,
-                        child: BarChart(
-                          _buildHabitComparisonChart(
-                            filteredHabits,
+                // Habit Comparison Chart
+                SliverPadding(
+                  padding: const EdgeInsets.all(Spacing.md),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Completion Rates',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: Spacing.md),
+                        GradientCard(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: Spacing.md,
+                            vertical: Spacing.lg,
+                          ),
+                          child: SizedBox(
+                            height: ChartStyles.chartHeight,
+                            child: BarChart(
+                              _buildHabitComparisonChart(filteredHabits),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            // Habits List with completion toggles
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md,
-                vertical: Spacing.md,
-              ),
-              sliver: filteredHabits.isEmpty
-                  ? SliverToBoxAdapter(
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.trending_up,
-                              size: 48,
-                              color: AppColors.mutedForeground.withValues(alpha: 0.5),
+                // Habits List with completion toggles
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.md,
+                    vertical: Spacing.md,
+                  ),
+                  sliver: filteredHabits.isEmpty
+                      ? SliverToBoxAdapter(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.trending_up,
+                                  size: 48,
+                                  color: AppColors.mutedForeground.withValues(alpha: 0.5),
+                                ),
+                                const SizedBox(height: Spacing.md),
+                                Text(
+                                  'No habits found',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: AppColors.mutedForeground.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: Spacing.md),
-                            Text(
-                              'No habits found',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color:
-                                    AppColors.mutedForeground.withValues(alpha: 0.7),
-                              ),
-                            ),
-                          ],
+                          ),
+                        )
+                      : SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (c, i) {
+                              final habit = filteredHabits[i];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: Spacing.md),
+                                child: _HabitCard(
+                                  habit: habit,
+                                  isCompletedToday: habit.completedToday,
+                                  onToggleComplete: () {
+                                    appState.toggleHabitCompletion(habit.id);
+                                  },
+                                ),
+                              );
+                            },
+                            childCount: filteredHabits.length,
+                          ),
                         ),
-                      ),
-                    )
-                  : SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (c, i) {
-                          final habit = filteredHabits[i];
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: Spacing.md),
-                            child: _HabitCard(
-                              habit: habit,
-                              isCompletedToday: habit.completedToday,
-                              onToggleComplete: () {
-                                appState.toggleHabitCompletion(habit.id);
-                              },
-                            ),
-                          );
-                        },
-                        childCount: filteredHabits.length,
-                      ),
-                    ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   /// Build habit comparison bar chart
-  BarChartData _buildHabitComparisonChart(
-    List<Habit> habits,
-  ) {
+  BarChartData _buildHabitComparisonChart(List<Habit> habits) {
     final barGroups = <BarChartGroupData>[];
 
     for (int i = 0; i < habits.length && i < 7; i++) {
@@ -281,6 +293,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
     );
   }
 }
+
 class _HabitCard extends StatefulWidget {
   final Habit habit;
   final bool isCompletedToday;
@@ -296,8 +309,7 @@ class _HabitCard extends StatefulWidget {
   State<_HabitCard> createState() => _HabitCardState();
 }
 
-class _HabitCardState extends State<_HabitCard>
-    with SingleTickerProviderStateMixin {
+class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotateAnimation;
@@ -379,7 +391,6 @@ class _HabitCardState extends State<_HabitCard>
                   ],
                 ),
               ),
-              // Animated completion badge
               ScaleTransition(
                 scale: _scaleAnimation,
                 child: RotationTransition(
@@ -392,8 +403,8 @@ class _HabitCardState extends State<_HabitCard>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: widget.isCompletedToday
-                            ? color.withValues(alpha:0.3)
-                            : AppColors.mutedForeground.withValues(alpha:0.1),
+                            ? color.withValues(alpha: 0.3)
+                            : AppColors.mutedForeground.withValues(alpha: 0.1),
                         border: Border.all(
                           color: widget.isCompletedToday
                               ? color
@@ -470,12 +481,10 @@ class _HabitCardState extends State<_HabitCard>
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: weekData[d]
-                                    ? color.withValues(alpha:0.3)
-                                    : AppColors.mutedForeground.withValues(alpha:0.1),
+                                    ? color.withValues(alpha: 0.3)
+                                    : AppColors.mutedForeground.withValues(alpha: 0.1),
                                 border: Border.all(
-                                  color: weekData[d]
-                                      ? color
-                                      : AppColors.border,
+                                  color: weekData[d] ? color : AppColors.border,
                                   width: 1,
                                 ),
                               ),
@@ -538,8 +547,7 @@ class _HabitCardState extends State<_HabitCard>
                 child: LinearProgressIndicator(
                   value: completionRate,
                   minHeight: 6,
-                  backgroundColor:
-                      AppColors.mutedForeground.withValues(alpha:0.2),
+                  backgroundColor: AppColors.mutedForeground.withValues(alpha: 0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                 ),
               ),
@@ -550,3 +558,4 @@ class _HabitCardState extends State<_HabitCard>
     );
   }
 }
+

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
-import '../widgets/gradient_background.dart';
-import '../widgets/modern_appbar.dart';
-import '../widgets/gradient_card.dart';
+
 import '../models/prayer_entry.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../utils/spacing.dart';
+import '../widgets/gradient_background.dart';
+import '../widgets/gradient_card.dart';
+import '../widgets/modern_appbar.dart';
+import '../widgets/status_bar_style.dart';
 import 'prayer_detail_screen.dart';
 
 typedef PrayerTapCallback = void Function(PrayerEntry prayer);
@@ -40,9 +42,8 @@ class _PrayerLogScreenState extends State<PrayerLogScreen> {
   Widget build(BuildContext context) {
     final list = widget.prayers ?? Provider.of<AppState>(context).prayers;
 
-    // Filter prayers based on selection
     List<PrayerEntry> filteredPrayers = list;
-    
+
     if (_selectedFilter != 'all') {
       filteredPrayers = filteredPrayers
           .where((p) => (p.category?.toLowerCase() ?? '').toLowerCase() == _selectedFilter.toLowerCase())
@@ -61,187 +62,200 @@ class _PrayerLogScreenState extends State<PrayerLogScreen> {
       filteredPrayers = filteredPrayers.where((p) => p.isAnswered).toList();
     }
 
-    return GradientBackground.prayer(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: ModernAppBar.prayer(
-          title: 'Prayer Log',
-          subtitle: '${filteredPrayers.length} prayers',
-        ),
-        body: ListView(
-          padding: const EdgeInsets.all(Spacing.lg),
-          children: [
-            GradientCard(
-              child: TextField(
-                onChanged: (q) => setState(() { _searchQuery = q; }),
-                decoration: const InputDecoration(
-                  hintText: 'Search prayers',
-                  prefixIcon: Icon(Icons.search),
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: Spacing.md),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: ['all', 'personal', 'family', 'friends', 'world']
-                    .map((filter) {
-                  final selected = _selectedFilter == filter;
-                  final label = filter[0].toUpperCase() + filter.substring(1);
-                  return Padding(
-                    padding: const EdgeInsets.only(right: Spacing.sm),
-                    child: ChoiceChip(
-                      label: Text(label),
-                      selected: selected,
-                      onSelected: (v) {
-                        if (v) setState(() => _selectedFilter = filter);
-                      },
-                      selectedColor: AppColors.primary.withValues(alpha: 0.8),
-                      backgroundColor: Colors.white,
-                      labelStyle: TextStyle(
-                        color: selected ? Colors.white : AppColors.textPrimary,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: Spacing.md),
-            GradientCard(
-              flat: true,
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md,
-                vertical: Spacing.sm,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Show Answered Only',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+    return StatusBarStyle(
+      child: GradientBackground.prayer(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: true,
+          appBar: ModernAppBar.prayer(
+            title: 'Prayer Log',
+            subtitle: '${filteredPrayers.length} prayers',
+          ),
+          body: SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(Spacing.lg),
+              children: [
+                GradientCard(
+                  child: TextField(
+                    onChanged: (q) => setState(() => _searchQuery = q),
+                    decoration: const InputDecoration(
+                      hintText: 'Search prayers',
+                      prefixIcon: Icon(Icons.search),
+                      border: InputBorder.none,
                     ),
                   ),
-                  Switch(
-                    value: _showAnswered,
-                    onChanged: (v) { setState(() { _showAnswered = v; }); },
-                    activeThumbColor: AppColors.pinkGradientStart,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: Spacing.lg),
-            if (filteredPrayers.isEmpty)
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.favorite_border,
-                      size: 48,
-                      color: AppColors.mutedForeground.withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    Text(
-                      'No prayers found',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.mutedForeground.withValues(alpha: 0.7),
-                      ),
-                    ),
-                  ],
                 ),
-              )
-            else ...filteredPrayers.map((p) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: Spacing.md),
-                child: GradientCard(
-                  onTap: () {
-                    if (widget.onViewPrayer != null) {
-                      widget.onViewPrayer!(p);
-                    } else {
-                      // open detail screen directly rather than relying on a
-                      // named route.  `viewPrayer` remains available for
-                      // flexibility but isn't required for navigation.
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => PrayerDetailScreen(
-                            title: p.title,
-                            description: p.description ?? '',
-                            isAnswered: p.isAnswered,
-                            onToggleAnswered: (answered) {
-                              Provider.of<AppState>(context, listen: false)
-                                  .togglePrayerAnswered(p.id);
-                            },
-                            createdAt: p.dateAdded,
-                            answeredAt: p.answeredDate,
+                const SizedBox(height: Spacing.md),
+
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: ['all', 'personal', 'family', 'friends', 'church', 'world']
+                        .map((filter) {
+                      final selected = _selectedFilter == filter;
+                      final label = filter[0].toUpperCase() + filter.substring(1);
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: Spacing.sm),
+                        child: ChoiceChip(
+                          label: Text(label),
+                          selected: selected,
+                          onSelected: (v) {
+                            if (v) setState(() => _selectedFilter = filter);
+                          },
+                          selectedColor: AppColors.primary.withValues(alpha: 0.8),
+                          backgroundColor: Colors.white,
+                          labelStyle: TextStyle(
+                            color: selected ? Colors.white : AppColors.textPrimary,
                           ),
                         ),
                       );
-                    }
-                  },
+                    }).toList(),
+                  ),
+                ),
+
+                const SizedBox(height: Spacing.md),
+
+                GradientCard(
+                  flat: true,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.md,
+                    vertical: Spacing.sm,
+                  ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              p.title,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              p.category ?? '',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.mutedForeground,
-                              ),
-                            ),
-                          ],
+                      const Text(
+                        'Show Answered Only',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(
-                          p.isAnswered ? Icons.check_circle : Icons.circle_outlined,
-                          color: p.isAnswered
-                              ? AppColors.greenGradientStart
-                              : AppColors.mutedForeground,
-                        ),
-                        onPressed: () {
-                          widget.onToggleAnswered?.call(p.id);
-                          Provider.of<AppState>(context, listen: false)
-                              .togglePrayerAnswered(p.id);
-                        },
+                      Switch(
+                        value: _showAnswered,
+                        onChanged: (v) => setState(() => _showAnswered = v),
+                        activeThumbColor: AppColors.pinkGradientStart,
                       ),
                     ],
                   ),
                 ),
-              );
-            }).toList(),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: widget.onAddPrayer ?? () => Navigator.pushNamed(context, '/add'),
-          backgroundColor: AppColors.pinkGradientStart,
-          child: const Icon(Icons.add),
-        )
-          .animate()
-          .scale(
-            duration: 500.ms,
-            curve: Curves.elasticOut,
+
+                const SizedBox(height: Spacing.lg),
+
+                if (filteredPrayers.isEmpty)
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.favorite_border,
+                          size: 48,
+                          color: AppColors.mutedForeground.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: Spacing.md),
+                        Text(
+                          'No prayers found',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.mutedForeground.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ...filteredPrayers.map((p) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: Spacing.md),
+                      child: GradientCard(
+                        onTap: () {
+                          if (widget.onViewPrayer != null) {
+                            widget.onViewPrayer!(p);
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PrayerDetailScreen(
+                                  title: p.title,
+                                  description: p.description ?? '',
+                                  isAnswered: p.isAnswered,
+                                  onToggleAnswered: (answered) {
+                                    Provider.of<AppState>(context, listen: false)
+                                        .togglePrayerAnswered(p.id);
+                                  },
+                                  createdAt: p.dateAdded,
+                                  answeredAt: p.answeredDate,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    p.title,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    p.category ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.mutedForeground,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                p.isAnswered
+                                    ? Icons.check_circle
+                                    : Icons.circle_outlined,
+                                color: p.isAnswered
+                                    ? AppColors.greenGradientStart
+                                    : AppColors.mutedForeground,
+                              ),
+                              onPressed: () {
+                                widget.onToggleAnswered?.call(p.id);
+                                Provider.of<AppState>(context, listen: false)
+                                    .togglePrayerAnswered(p.id);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+              ],
+            ),
           ),
+          floatingActionButton: FloatingActionButton(
+            onPressed:
+                widget.onAddPrayer ?? () => Navigator.pushNamed(context, '/add'),
+            backgroundColor: AppColors.pinkGradientStart,
+            child: const Icon(Icons.add),
+          )
+              .animate()
+              .scale(
+                duration: 500.ms,
+                curve: Curves.elasticOut,
+              ),
+        ),
       ),
     );
   }
 }
+

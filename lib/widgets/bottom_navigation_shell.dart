@@ -17,8 +17,17 @@ class BottomNavigationShell extends StatefulWidget {
 class _BottomNavigationShellState extends State<BottomNavigationShell> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    HomeScreen(),
+  void _setIndex(int index) {
+    if (index == _currentIndex) return;
+    setState(() => _currentIndex = index);
+  }
+
+  late final List<Widget> _pages = [
+    HomeScreen(
+      onGoToBiblePlan: () => _setIndex(1),
+      onGoToPrayerLog: () => _setIndex(3),
+      onGoToHabits: () => _setIndex(2),
+    ),
     BiblePlanScreen(),
     HabitTrackingScreen(),
     PrayerLogScreen(),

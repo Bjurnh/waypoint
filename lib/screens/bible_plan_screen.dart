@@ -9,12 +9,14 @@ import '../widgets/gradient_background.dart';
 import '../widgets/gradient_card.dart';
 import '../widgets/reading_progress_chart.dart';
 import '../widgets/summary_card.dart';
+import '../widgets/status_bar_style.dart';
 
 class BiblePlanScreen extends StatelessWidget {
-  const BiblePlanScreen({Key? key}) : super(key: key);
+  const BiblePlanScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     final app = context.watch<AppState>();
     final readings = app.readings;
     final config = app.config ??
@@ -27,23 +29,18 @@ class BiblePlanScreen extends StatelessWidget {
         ? 'Create your personalized Bible reading plan to start your journey.'
         : 'Continue your daily journey through Scripture';
 
-    return GradientBackground.home(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
+    return StatusBarStyle(
+      child: GradientBackground.home(
+        child: Scaffold(
           backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: const Text('Bible Reading Plan'),
-          leading: BackButton(onPressed: () => Navigator.maybePop(context)),
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.lg,
-              vertical: Spacing.lg,
-            ),
-            child: readings.isEmpty
+          extendBodyBehindAppBar: true,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.lg,
+                vertical: Spacing.lg,
+              ),
+              child: readings.isEmpty
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -337,10 +334,11 @@ class BiblePlanScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: Spacing.md),
                         Column(
-                          children: readings.map((day) {
+                          children: readings.asMap().entries.map((entry) {
+                            final dayIndex = entry.key;
+                            final day = entry.value;
                             final dayDate = day.date;
-                            final formattedDate =
-                                dayDate.toIso8601String().split('T').first;
+                            final formattedDate = _formatMonthDayYear(dayDate);
                             final available = !dayDate.isAfter(DateTime.now());
                             return Padding(
                               padding:
@@ -392,7 +390,7 @@ class BiblePlanScreen extends StatelessWidget {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  'Day ${day.id}',
+                                                  'Day ${dayIndex + 1} reading',
                                                   style: Theme.of(context)
                                                       .textTheme
                                                       .titleMedium
@@ -595,19 +593,27 @@ class BiblePlanScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 
-  List<bool> _getWeeklyProgress(List<DayReading> readings) {
-    final now = DateTime.now();
-    final weekStart = now.subtract(Duration(days: now.weekday - 1));
-    return List.generate(7, (i) {
-      final checkDate = weekStart.add(Duration(days: i));
-      return readings.any((r) =>
-          r.date.year == checkDate.year &&
-          r.date.month == checkDate.month &&
-          r.date.day == checkDate.day);
-    });
+
+  String _formatMonthDayYear(DateTime date) {
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    final month = monthNames[date.month - 1];
+    return '$month ${date.day}, ${date.year}';
   }
 
   int _calculateCompletedChapters(List<DayReading> readings) {
