@@ -111,9 +111,13 @@ class FeatureCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF2D2D44)
+                : AppColors.border,
+          ),
           boxShadow: Spacing.shadowMd,
         ),
         child: Material(
@@ -155,8 +159,8 @@ class FeatureCard extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -165,8 +169,8 @@ class FeatureCard extends StatelessWidget {
                           const SizedBox(height: Spacing.xs),
                           Text(
                             description!,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                               fontSize: 13,
                             ),
                           ),
@@ -175,9 +179,9 @@ class FeatureCard extends StatelessWidget {
                     ),
                   ),
                   // Arrow icon
-                  const Icon(
+                  Icon(
                     Icons.arrow_forward_ios,
-                    color: AppColors.textMuted,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                     size: 16,
                   ),
                 ],

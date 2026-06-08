@@ -141,11 +141,13 @@ class AppState extends ChangeNotifier {
 
   Future<void> saveReadings() async {
     final box = _hive.readingsBox;
-    await box.clear();
-    for (var r in readings) {
+    // Avoid clearing the entire box on every toggle.
+    // Hive objects are stored under their `id` key.
+    for (final r in readings) {
       await box.put(r.id, r);
     }
   }
+
 
   Future<void> savePrayers() async {
     final box = _hive.prayersBox;
@@ -786,14 +788,41 @@ class AppState extends ChangeNotifier {
 
   Future<void> toggleReadingCompletion(String id) async {
     final idx = readings.indexWhere((r) => r.id == id);
-    if (idx == -1) return;
-    final item = readings[idx];
-    item.completed = !item.completed;
-    item.completionDate = item.completed ? DateTime.now() : null;
+    if (idx == -1) {
+      // Helpful debug signal: mismatched id vs current readings.
+      // Remove/disable in production if desired.
+      debugPrint('toggleReadingCompletion: id=$id not found');
+      return;
+    }
+
+    final now = DateTime.now();
+    final current = readings[idx];
+
+    final updated = DayReading(
+      id: current.id,
+      date: current.date,
+      chapters: List<String>.from(current.chapters),
+      completed: !current.completed,
+      completionDate: current.completed ? null : now,
+    );
+
+    // Replace element to avoid in-place mutation issues.
+    readings = List<DayReading>.from(readings);
+    readings[idx] = updated;
+
     await saveReadings();
+
+    // Debug verification: ensure the selected reading id now maps to completed=true
+    final postIdx = readings.indexWhere((r) => r.id == id);
+    final postCompleted = postIdx == -1 ? null : readings[postIdx].completed;
+    debugPrint('toggleReadingCompletion: id=$id updated.completed=${updated.completed}, postReadings.completed=$postCompleted');
+
     _recalculate();
     notifyListeners();
+
   }
+
+
 
   Future<void> togglePrayerAnswered(String? id) async {
     if (id == null) return;

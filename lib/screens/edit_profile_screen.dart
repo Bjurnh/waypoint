@@ -46,6 +46,8 @@ text: appState.displayName ?? 'Prayer Warrior',
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
+    final brightness = Theme.of(context).brightness;
+    final isDarkMode = brightness == Brightness.dark;
 
     return StatusBarStyle(
       child: Scaffold(
@@ -77,9 +79,15 @@ text: appState.displayName ?? 'Prayer Warrior',
           child: Stack(
             children: [
               GradientBackground(
-                startColor: Colors.blue.withValues(alpha: 0.05),
-                midColor: Colors.indigo.withValues(alpha: 0.05),
-                endColor: Colors.white,
+                startColor: isDarkMode 
+                    ? Colors.transparent 
+                    : Colors.blue.withValues(alpha: 0.05),
+                midColor: isDarkMode 
+                    ? null 
+                    : Colors.indigo.withValues(alpha: 0.05),
+                endColor: isDarkMode
+                    ? Theme.of(context).colorScheme.surface
+                    : Colors.white,
                 child: Container(),
               ),
               SingleChildScrollView(

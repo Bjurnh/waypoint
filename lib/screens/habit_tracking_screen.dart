@@ -45,6 +45,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     final List<Habit> allHabits = appState.habits;
 
@@ -69,7 +70,6 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
 
     return StatusBarStyle(
       child: GradientBackground.habit(
-        
         child: Scaffold(
           backgroundColor: Colors.transparent,
           extendBodyBehindAppBar: true,
@@ -111,12 +111,12 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "Today's Progress",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: colorScheme.onPrimary,
                             ),
                           ),
                           const SizedBox(height: Spacing.md),
@@ -129,17 +129,17 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                                 children: [
                                   Text(
                                     '${(allHabits.isEmpty ? 0 : ((completedToday / allHabits.length) * 100)).toStringAsFixed(0)}%',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 32,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                                      color: colorScheme.onPrimary,
                                     ),
                                   ),
                                   const Text(
                                     'Completion Rate',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.white70,
+                                      color: AppColors.textMuted,
                                     ),
                                   ),
                                 ],
@@ -150,7 +150,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Colors.white30,
+                                    color: colorScheme.onPrimary.withValues(alpha: 0.2),
                                     width: 4,
                                   ),
                                 ),
@@ -236,7 +236,7 @@ class _HabitTrackingScreenState extends State<HabitTrackingScreen> {
                                   'No habits found',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: AppColors.mutedForeground.withValues(alpha: 0.7),
+                                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                                   ),
                                 ),
                               ],
@@ -355,6 +355,7 @@ class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final weekData = widget.habit.weekData.length == 7
         ? widget.habit.weekData
         : List<bool>.filled(7, false);
@@ -374,18 +375,18 @@ class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMi
                   children: [
                     Text(
                       widget.habit.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       widget.habit.subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.mutedForeground,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -404,11 +405,11 @@ class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMi
                         shape: BoxShape.circle,
                         color: widget.isCompletedToday
                             ? color.withValues(alpha: 0.3)
-                            : AppColors.mutedForeground.withValues(alpha: 0.1),
+                            : colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
                         border: Border.all(
                           color: widget.isCompletedToday
                               ? color
-                              : AppColors.border,
+                              : colorScheme.outline,
                           width: 2,
                         ),
                       ),
@@ -423,7 +424,7 @@ class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMi
                           : Center(
                               child: Icon(
                                 kIconMap[widget.habit.iconKey] ?? Icons.help_outline,
-                                color: AppColors.mutedForeground,
+                                color: colorScheme.onSurfaceVariant,
                                 size: 20,
                               ),
                             ),
@@ -457,12 +458,12 @@ class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMi
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'This Week',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: Spacing.sm),
@@ -482,9 +483,9 @@ class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMi
                                 shape: BoxShape.circle,
                                 color: weekData[d]
                                     ? color.withValues(alpha: 0.3)
-                                    : AppColors.mutedForeground.withValues(alpha: 0.1),
+                                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
                                 border: Border.all(
-                                  color: weekData[d] ? color : AppColors.border,
+                                  color: weekData[d] ? color : colorScheme.outline,
                                   width: 1,
                                 ),
                               ),
@@ -501,9 +502,9 @@ class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMi
                             const SizedBox(height: 4),
                             Text(
                               ['M', 'T', 'W', 'T', 'F', 'S', 'S'][d],
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
-                                color: AppColors.textSecondary,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -528,6 +529,7 @@ class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMi
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
+                      // keep design in light, auto in dark via theme override below
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -547,7 +549,7 @@ class _HabitCardState extends State<_HabitCard> with SingleTickerProviderStateMi
                 child: LinearProgressIndicator(
                   value: completionRate,
                   minHeight: 6,
-                  backgroundColor: AppColors.mutedForeground.withValues(alpha: 0.2),
+                  backgroundColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                 ),
               ),

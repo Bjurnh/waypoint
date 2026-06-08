@@ -56,6 +56,8 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
   Widget build(BuildContext context) {
     final createdTimeAgo = timeago.format(_createdAt);
     final answeredTimeAgo = _answeredAt != null ? timeago.format(_answeredAt!) : null;
+    final brightness = Theme.of(context).brightness;
+    final isDarkMode = brightness == Brightness.dark;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -84,9 +86,15 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
       body: Stack(
         children: [
           GradientBackground(
-            startColor: Colors.pink.withValues(alpha:0.05),
-            midColor: Colors.purple.withValues(alpha: 0.05),
-            endColor: Colors.white,
+            startColor: isDarkMode 
+                ? Colors.transparent 
+                : Colors.pink.withValues(alpha: 0.05),
+            midColor: isDarkMode 
+                ? null 
+                : Colors.purple.withValues(alpha: 0.05),
+            endColor: isDarkMode
+                ? Theme.of(context).colorScheme.surface
+                : Colors.white,
             child: Container(),
           ),
           SingleChildScrollView(

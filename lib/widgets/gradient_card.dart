@@ -163,14 +163,22 @@ class GradientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = backgroundColor ?? AppColors.card;
-    final bColor = borderColor ?? AppColors.border;
+    final brightness = Theme.of(context).brightness;
+    final isDarkMode = brightness == Brightness.dark;
+    
+    final bgColor = backgroundColor ?? (isDarkMode 
+        ? Theme.of(context).colorScheme.surface 
+        : AppColors.card);
+    
+    final bColor = borderColor ?? (isDarkMode
+        ? Theme.of(context).colorScheme.outlineVariant
+        : AppColors.border);
     
     final cardWidget = Container(
       padding: padding,
       decoration: BoxDecoration(
         color: flat ? null : (gradientStart != null ? null : bgColor),
-        gradient: (gradientStart != null && gradientEnd != null)
+        gradient: (gradientStart != null && gradientEnd != null && !isDarkMode)
             ? LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -179,7 +187,7 @@ class GradientCard extends StatelessWidget {
             : null,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(color: bColor, width: 1),
-        boxShadow: _getShadow(),
+        boxShadow: isDarkMode ? [] : _getShadow(),
       ),
       child: child,
     );

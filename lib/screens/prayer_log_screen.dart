@@ -258,4 +258,3 @@ class _PrayerLogScreenState extends State<PrayerLogScreen> {
     );
   }
 }
-

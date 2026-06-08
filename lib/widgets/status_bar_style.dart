@@ -12,13 +12,20 @@ class StatusBarStyle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // In dark mode we want light status bar icons; in light mode we want dark icons.
+    final overlayStyle = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+      statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+    );
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-      ),
+      value: overlayStyle,
       child: child,
     );
   }
+
 }
 

@@ -16,20 +16,29 @@ class BiblePlanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final app = context.watch<AppState>();
-    final readings = app.readings;
-    final config = app.config ??
+    final config = context.select<AppState, PlanConfig?>((app) => app.config) ??
         PlanConfig(length: 30, startDate: DateTime.now(), style: 'sequential');
+
+    final readings = context.select<AppState, List<DayReading>>((app) => app.readings);
+
     final completedDays = readings.where((r) => r.completed).length;
     final completionPercentage =
-        (completedDays / (readings.isEmpty ? 1 : readings.length) * 100)
-            .toInt();
+        (completedDays / (readings.isEmpty ? 1 : readings.length) * 100);
+
+
     final planSubtitle = readings.isEmpty
         ? 'Create your personalized Bible reading plan to start your journey.'
         : 'Continue your daily journey through Scripture';
 
+    // Debug: confirm header sees updated completion state.
+    final debugCompletedIds = readings.where((r) => r.completed).map((r) => r.id).toList();
+    // ignore: avoid_print
+    print('BiblePlanScreen.build: completedDays=$completedDays completionPercentage=$completionPercentage completedIds=${debugCompletedIds.take(3).toList()}');
+
+
+
     return StatusBarStyle(
+
       child: GradientBackground.home(
         child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -191,9 +200,10 @@ class BiblePlanScreen extends StatelessWidget {
                                         ),
                                         const SizedBox(height: Spacing.xs),
                                         Text(
-                                          '$completionPercentage% complete',
+                                          '${completionPercentage.toStringAsFixed(1)}% complete',
                                           style: const TextStyle(
                                             fontSize: 22,
+
                                             fontWeight: FontWeight.bold,
                                             color: AppColors.textPrimary,
                                           ),
@@ -228,10 +238,11 @@ class BiblePlanScreen extends StatelessWidget {
                             const SizedBox(width: Spacing.md),
                             Expanded(
                               child: SummaryCard.streak(
-                                value: '${app.currentStreak}',
+                                value: '${context.select<AppState, int>((a) => a.currentStreak)}',
                                 label: 'Streak',
                               ),
                             ),
+
                             const SizedBox(width: Spacing.md),
                             Expanded(
                               child: SummaryCard.habits(

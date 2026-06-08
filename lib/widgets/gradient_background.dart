@@ -186,14 +186,18 @@ class GradientBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final isDarkMode = brightness == Brightness.dark;
+    
     return Container(
       decoration: BoxDecoration(
-        gradient: _buildGradient(),
+        color: isDarkMode ? Theme.of(context).colorScheme.surface : null,
+        gradient: isDarkMode ? null : _buildGradient(),
       ),
       child: Stack(
         children: [
-          // Decorative blur elements
-          if (showDecorative) ...[
+          // Decorative blur elements - only show in light mode
+          if (showDecorative && !isDarkMode) ...[
             if (decorativeColor1 != null)
               Positioned(
                 top: 0,

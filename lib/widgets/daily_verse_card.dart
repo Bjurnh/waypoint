@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 import '../utils/spacing.dart';
 
@@ -7,10 +8,10 @@ import '../utils/spacing.dart';
 class DailyVerseCard extends StatelessWidget {
   /// The verse text to display
   final String verse;
-  
+
   /// The book/reference of the verse
   final String? reference;
-  
+
   /// Callback when bookmark icon is tapped
   final VoidCallback? onBookmarkTap;
 
@@ -23,18 +24,25 @@ class DailyVerseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFDBEAFE), // blue-100
-            Color(0xFFFCE7F3), // pink-100
-          ],
-        ),
+        gradient: isDark
+            ? null
+            : const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFDBEAFE), // blue-100
+                  Color(0xFFFCE7F3), // pink-100
+                ],
+              ),
+        color: isDark ? Theme.of(context).colorScheme.surface : null,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: isDark ? const Color(0xFF2D2D44) : AppColors.border,
+        ),
         boxShadow: Spacing.shadowMd,
       ),
       child: Stack(
@@ -48,7 +56,9 @@ class DailyVerseCard extends StatelessWidget {
               child: Icon(
                 Icons.add,
                 size: 120,
-                color: AppColors.primary,
+                color: isDark
+                    ? Theme.of(context).colorScheme.onSurface
+                    : AppColors.primary,
               ),
             ),
           ),
@@ -62,7 +72,9 @@ class DailyVerseCard extends StatelessWidget {
                 width: 3,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: isDark
+                      ? Theme.of(context).colorScheme.onSurface
+                      : AppColors.primary,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -78,12 +90,15 @@ class DailyVerseCard extends StatelessWidget {
                 width: 40,
                 height: 3,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: isDark
+                      ? Theme.of(context).colorScheme.onSurface
+                      : AppColors.primary,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
           ),
+
           // Main content
           Padding(
             padding: const EdgeInsets.all(Spacing.lg),
@@ -101,22 +116,24 @@ class DailyVerseCard extends StatelessWidget {
                         vertical: Spacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: isDark
+                            ? const Color(0xFFFAFAFA).withValues(alpha: 0.12)
+                            : Colors.white.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(Spacing.radiusFull),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.bookmark,
                             size: 14,
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           SizedBox(width: Spacing.xs),
                           Text(
                             'Daily Verse',
                             style: TextStyle(
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -124,43 +141,51 @@ class DailyVerseCard extends StatelessWidget {
                         ],
                       ),
                     ),
+
                     // Bookmark icon button
                     GestureDetector(
                       onTap: onBookmarkTap,
                       child: Container(
                         padding: const EdgeInsets.all(Spacing.sm),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: isDark
+                              ? const Color(0xFFFAFAFA).withValues(alpha: 0.12)
+                              : Colors.white.withValues(alpha: 0.8),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.bookmark_border,
                           size: 20,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
                   ],
                 ),
+
                 const SizedBox(height: Spacing.lg),
+
                 // Verse text
                 Text(
                   verse,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                     height: 1.5,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
+
                 if (reference != null) ...[
                   const SizedBox(height: Spacing.md),
+
                   // Reference
                   Text(
                     reference!,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface
+                          .withOpacity(0.7),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -174,3 +199,4 @@ class DailyVerseCard extends StatelessWidget {
     );
   }
 }
+

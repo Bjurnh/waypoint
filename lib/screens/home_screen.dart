@@ -36,7 +36,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final app = Provider.of<AppState>(context);
 
-return StatusBarStyle(
+    return StatusBarStyle(
       child: GradientBackground.home(
         child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -59,10 +59,10 @@ return StatusBarStyle(
                   children: [
                     Text(
                       _getGreeting(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: Spacing.xs),
@@ -87,15 +87,23 @@ return StatusBarStyle(
                 Container(
                   padding: const EdgeInsets.all(Spacing.md),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withOpacity(
+                          Theme.of(context).brightness == Brightness.dark ? 0.3 : 0.08,
+                        ),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
                     ],
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF2D2D44)
+                          : AppColors.border,
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -103,7 +111,7 @@ return StatusBarStyle(
                         width: 56,
                         height: 56,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF6B35),
+                      color: const Color(0xFFFF6B35),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -117,21 +125,21 @@ return StatusBarStyle(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Current Streak',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               '${app.currentStreak} Days Strong! 🔥',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -142,14 +150,14 @@ return StatusBarStyle(
                 ),
                 const SizedBox(height: Spacing.xl),
 
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: Spacing.sm),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
                   child: Text(
                     'Quick Actions',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -192,4 +200,3 @@ return StatusBarStyle(
     );
   }
 }
-

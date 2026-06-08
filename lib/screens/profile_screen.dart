@@ -45,11 +45,19 @@ class ProfileScreen extends StatelessWidget {
         body: SafeArea(
           child: Stack(
             children: [
-              GradientBackground(
-                startColor: Colors.blue.withValues(alpha: 0.05),
-                midColor: Colors.indigo.withValues(alpha: 0.05),
-                endColor: Colors.white,
-                child: Container(),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  final colorScheme = Theme.of(context).colorScheme;
+
+                  return GradientBackground(
+                    startColor: Colors.blue.withValues(alpha: 0.05),
+                    midColor: Colors.indigo.withValues(alpha: 0.05),
+                    // Avoid forcing a light background in dark mode.
+                    endColor: isDark ? colorScheme.surface : Colors.white,
+                    child: Container(),
+                  );
+                },
               ),
               SingleChildScrollView(
                 padding: const EdgeInsets.only(
@@ -97,6 +105,7 @@ class ProfileScreen extends StatelessWidget {
                               size: 40,
                               color: Colors.white,
                             ),
+
                           ),
                           const SizedBox(height: Spacing.md),
                           Consumer<AppState>(
@@ -106,15 +115,15 @@ class ProfileScreen extends StatelessWidget {
                                   : 'Prayer Warrior',
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.foreground,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                             ),
                           ),
                           const SizedBox(height: Spacing.xs),
                           Text(
                             'Member since ${DateTime.now().year}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                           ),
                         ],
