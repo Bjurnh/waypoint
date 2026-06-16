@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:waypoint/models/day_reading.dart';
 import 'package:provider/provider.dart';
+import '../models/plan_models.dart' show PlanMode;
 import 'package:waypoint/state/app_state.dart';
 import '../models/plan_config.dart';
 import '../theme/app_colors.dart';
@@ -401,8 +403,9 @@ class BiblePlanScreen extends StatelessWidget {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  'Day ${dayIndex + 1} reading',
+                                                'Day ${config.length == 365 ? _dayNumberSinceYearStart(day.date) : dayIndex + 1} reading',
                                                   style: Theme.of(context)
+
                                                       .textTheme
                                                       .titleMedium
                                                       ?.copyWith(
@@ -633,12 +636,38 @@ class BiblePlanScreen extends StatelessWidget {
         .fold<int>(0, (sum, reading) => sum + reading.chapters.length);
   }
 
+
+
   int _calculateTotalChapters(List<DayReading> readings) {
     return readings.fold<int>(
         0, (sum, reading) => sum + reading.chapters.length);
   }
 
+  int _dayNumberSinceYearStart(DateTime date) {
+    final normalized = DateTime(date.year, date.month, date.day);
+    final yearStart = DateTime(date.year, 1, 1);
+    return normalized.difference(yearStart).inDays + 1;
+  }
+
+
+  int _daysOffsetFromToday(List<DayReading> readings) {
+    if (readings.isEmpty) return 0;
+
+    final today = DateTime.now();
+    final normalizedToday = DateTime(today.year, today.month, today.day);
+
+    final start = readings.first.date;
+    final normalizedStart = DateTime(start.year, start.month, start.day);
+
+    // Day numbers in the UI are meant to represent "day count since plan start".
+    // If today is within the plan window, offset = difference in days.
+    // If today is outside, clamp to keep UI stable.
+    final diffDays = normalizedToday.difference(normalizedStart).inDays;
+    return diffDays.clamp(0, readings.length - 1);
+  }
+
   String _getCurrentBook(List<DayReading> readings) {
+
     if (readings.isEmpty) return 'Genesis';
 
     final lastCompleted = readings.lastWhere(

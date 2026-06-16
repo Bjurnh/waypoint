@@ -364,9 +364,59 @@ class AppState extends ChangeNotifier {
   Future<void> generatePlan(plan_models.PlanConfig config) async {
     if (config.readingStyle == 'bibleInYear') {
       final planStartDate = config.startDate;
-      readings = createBibleInYearPlan(startDate: planStartDate);
+
+      final fullPlan = createBibleInYearPlan(startDate: planStartDate);
+
+
+      if (config.mode == plan_models.PlanMode.continueCurrent &&
+          config.lastBook != null &&
+          config.lastChapter != null) {
+        // Continue for Bible-in-a-Year must preserve the OT+NT pairing.
+        // We generate the full mixed plan and then slice from the day that
+        // contains the user’s last read position.
+        // TODO: continue position for Bible-in-a-Year should preserve OT+NT pairing.
+        // Start from the user-provided current reading position.
+        final startDayIndex = _findBibleInYearStartDayIndex(
+          fullPlan,
+          lastBook: config.lastBook!,
+          lastChapter: config.lastChapter!,
+          lastVerse: config.lastVerse,
+        );
+
+        final skipped = fullPlan.skip(startDayIndex).toList();
+        var updated = skipped
+            .asMap()
+            .entries
+            .map(
+              (e) => DayReading(
+                id: 'reading_${e.key}',
+                date: DateTime(
+                  planStartDate.year,
+                  planStartDate.month,
+                  planStartDate.day,
+                ).add(Duration(days: e.key)),
+                chapters: e.value.chapters,
+                completed: false,
+              ),
+            )
+            .toList();
+
+        // Ensure length matches the generator’s requested timeframe.
+        // Note: truncate the sliced `updated`, not the previous `readings`.
+        if (updated.length > config.timeFrame) {
+          updated = updated.sublist(0, config.timeFrame);
+        }
+
+        readings = updated;
+
+      } else {
+        readings = fullPlan;
+      }
+
       generatedPlanConfig = plan_models.PlanConfig(
-        timeFrame: 365,
+        // timeFrame is derived from the PlanConfig passed from the generator,
+        // which now represents “end at day-of-year 365” (so length can vary).
+        timeFrame: config.timeFrame,
         startDate: planStartDate,
         dailyMinutes: config.dailyMinutes,
         readingStyle: config.readingStyle,
@@ -379,11 +429,12 @@ class AppState extends ChangeNotifier {
       );
 
       this.config = PlanConfig(
-        length: 365,
+        length: config.timeFrame,
         startDate: planStartDate,
         style: config.readingStyle,
       );
     } else {
+
       generatedPlanConfig = config;
 
       // Convert to storage model
@@ -416,6 +467,122 @@ class AppState extends ChangeNotifier {
         _findChapterIndex(allChapters, config.lastBook, config.lastChapter);
     return allChapters.sublist(startIndex);
   }
+
+  /// Finds the index in the Bible-in-a-Year mixed plan from which the
+  /// user's next unread reading should start.
+  ///
+  /// [fullPlan] days contain exactly two entries in [DayReading.chapters]:
+  ///   - index 0: OT label (e.g. "Isaiah 40 - Isaiah 41")
+  ///   - index 1: NT range label(s) (e.g. "John 3:1-16")
+  int _findBibleInYearStartDayIndex(
+    List<DayReading> fullPlan, {
+    required String lastBook,
+    required int lastChapter,
+    int? lastVerse,
+  }) {
+    final needleBook = lastBook.trim().toLowerCase();
+
+    // Conservative fallback: start from day 0.
+    var best = 0;
+
+    for (int i = 0; i < fullPlan.length; i++) {
+      final day = fullPlan[i];
+      final chapters = day.chapters;
+      if (chapters.length < 2) continue;
+
+      final otLabel = chapters.first;
+      final ntLabel = chapters[1];
+
+      final otMatches = _labelContainsBookChapter(otLabel, needleBook, lastChapter);
+      final ntMatches = _labelContainsBookChapter(ntLabel, needleBook, lastChapter);
+
+      if (!otMatches && !ntMatches) continue;
+
+      // If verse was provided, try to ensure we match the NT range precisely.
+      // OT labels don't have verses.
+      if (lastVerse == null || lastVerse <= 0) {
+        best = i + 1; // start after the day that contains the last read position
+        break;
+      }
+
+      final verseMatches =
+          _labelContainsBookChapterVerse(ntLabel, needleBook, lastChapter, lastVerse);
+
+      if (otMatches) {
+        // Last position seems to be in OT, so just advance by one day.
+        best = i + 1;
+        break;
+      }
+
+      if (verseMatches) {
+        best = i + 1;
+        break;
+      }
+    }
+
+    if (best < 0) best = 0;
+    if (best > fullPlan.length) best = fullPlan.length;
+    return best;
+  }
+
+  bool _labelContainsBookChapter(String label, String needleBook, int needleChapter) {
+    // Normalize separators.
+    final l = label.trim().toLowerCase();
+
+    // Match patterns like "Isaiah 40" or "John 3".
+    // Also works when labels include ranges: "Isaiah 40 - Isaiah 41".
+    // We'll do a simple token/number scan.
+    // Example: tokens: [isaiah, 40, -, isaiah, 41]
+    final parts = l
+        .replaceAll(':', ' ')
+        .replaceAll('-', ' - ')
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .toList();
+
+    for (int i = 0; i < parts.length - 1; i++) {
+      final p = parts[i];
+      final next = parts[i + 1];
+      if (p == needleBook) {
+        final ch = int.tryParse(next);
+        if (ch == needleChapter) return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool _labelContainsBookChapterVerse(
+    String label,
+    String needleBook,
+    int needleChapter,
+    int needleVerse,
+  ) {
+    final l = label.trim().toLowerCase();
+
+    // We look for the first "book chapter:" segment.
+    // Expected label format from formatter in bible_in_year_plan.dart:
+    //   "Book chapter:startVerse-endVerse" or "Book chapter:startVerse-endVerse; ..."
+    final rangeRe = RegExp(
+      r'(?<book>[^0-9:;]+)\s*(?<chapter>\d+)\s*:\s*(?<startVerse>\d+)-(?<endVerse>\d+)',
+    );
+
+    for (final m in rangeRe.allMatches(l)) {
+      final book = (m.namedGroup('book') ?? '').trim();
+      final ch = int.tryParse(m.namedGroup('chapter') ?? '');
+      final startV = int.tryParse(m.namedGroup('startVerse') ?? '');
+      final endV = int.tryParse(m.namedGroup('endVerse') ?? '');
+
+      if (book.toLowerCase() == needleBook && ch == needleChapter && startV != null && endV != null) {
+        if (needleVerse >= startV && needleVerse <= endV) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
 
   int _findChapterIndex(
     List<plan_models.BibleChapter> chapters,
@@ -663,6 +830,7 @@ class AppState extends ChangeNotifier {
 
   int _estimateChapterVerseCount(String book, int chapter) {
     const baseVerses = {
+      
       'Genesis': 31,
       'Exodus': 28,
       'Leviticus': 25,

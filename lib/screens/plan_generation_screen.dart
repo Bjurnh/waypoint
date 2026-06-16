@@ -22,8 +22,42 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
   final _lastVerseCtrl = TextEditingController();
   String _selectedLastBook = 'Genesis';
   DateTime _startDate = DateTime.now();
-  DateTime _targetEndDate = DateTime.now().add(const Duration(days: 365));
+  // Plan should end at day-of-year = 365 (end-point), not “365 daily entries”.
+  // We compute the actual number of generated readings based on the chosen start date.
+  DateTime _targetEndDate = DateTime.now();
+
   String _readingStyle = 'bibleInYear';
+
+  static const int _endDayOfYear = 365;
+
+  /// Returns the actual calendar date that corresponds to “day 365” for the given year.
+  /// If the year is a leap year and day 365 would fall after Dec 31-1, clamp to Dec 31.
+  DateTime _dateForEndDayOfYear(int year) {
+    final jan1 = DateTime(year, 1, 1);
+    final candidate = jan1.add(Duration(days: _endDayOfYear - 1));
+    // Clamp so we never go past Dec 31.
+    return DateTime(year, 12, 31).isBefore(candidate)
+        ? DateTime(year, 12, 31)
+        : candidate;
+  }
+
+  DateTime _computeEndOfYear(DateTime start) {
+    return _dateForEndDayOfYear(start.year);
+  }
+
+
+  void _syncContinueTargetEndDate() {
+    _targetEndDate = _computeEndOfYear(_startDate);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Default start date to now; compute target end for day-of-year 365.
+    _syncContinueTargetEndDate();
+  }
+
+
   String _selectedTimeFrame = '365';
   String _planMode = 'start';
 
@@ -114,24 +148,20 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
     if (picked != null) {
       setState(() {
         _startDate = picked;
-        if (_targetEndDate.isBefore(_startDate)) {
-          _targetEndDate = _startDate.add(const Duration(days: 90));
+        if (_planMode == 'continue') {
+          _syncContinueTargetEndDate();
         }
       });
     }
   }
 
+
+  // Continue mode always targets Dec 31; end-date picking is disabled.
   Future<void> _pickEndDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _targetEndDate,
-      firstDate: _startDate,
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) {
-      setState(() => _targetEndDate = picked);
-    }
+    if (_planMode != 'continue') return;
+    _syncContinueTargetEndDate();
   }
+
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -140,13 +170,12 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
   }
 
   int _computeTargetDays() {
-    if (_planMode == 'continue') {
-      // For continue mode, always calculate based on end date
-      final days = _targetEndDate.difference(_startDate).inDays + 1;
-      return days < 1 ? 1 : days;
-    }
-    return int.tryParse(_selectedTimeFrame) ?? 90;
+    // “365” means end-point day-of-year 365, so the number of generated reading entries
+    // depends on the chosen start date.
+    final days = _targetEndDate.difference(_startDate).inDays + 1;
+    return days < 1 ? 1 : days;
   }
+
 
   void _generate() {
     if (_planMode == 'continue' && _lastChapterCtrl.text.trim().isEmpty) {
@@ -192,6 +221,7 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
     final startDateStr = _startDate.toLocal().toIso8601String().split('T')[0];
     final endDateStr = _targetEndDate.toLocal().toIso8601String().split('T')[0];
     final timeFrameOptions = ['365'];
+
     final modeLabel = _planMode == 'continue'
         ? 'Continue from current reading'
         : 'Start a new plan from Genesis to Revelation';
@@ -366,19 +396,21 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                                         ),
                                   ),
                                   const SizedBox(height: Spacing.md),
-                                  Wrap(
-                                    spacing: Spacing.md,
-                                    runSpacing: Spacing.md,
-                                    children: timeFrameOptions.map((days) {
+                      Wrap(
+                        spacing: Spacing.md,
+                        runSpacing: Spacing.md,
+                        children: timeFrameOptions.map((days) {
                                       final isSelected = _selectedTimeFrame == days;
+                                      // UI option label refers to end-point day-of-year.
                                       return optionChip(
-                                        label: '${int.parse(days)} days',
+                                        label: 'Ends on day ${int.parse(days)}',
                                         selected: isSelected,
                                         onSelected: (selected) {
                                           if (selected) {
                                             setState(() => _selectedTimeFrame = days);
                                           }
                                         },
+
                                         isFilter: true,
                                       );
                                     }).toList(),
@@ -506,6 +538,52 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
+                                    'Reading Style',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.foreground,
+                                        ),
+                                  ),
+                                  const SizedBox(height: Spacing.md),
+                                  Wrap(
+                                    spacing: Spacing.md,
+                                    runSpacing: Spacing.sm,
+                                    children: [
+                                      optionChip(
+                                        label: 'Sequential',
+                                        selected: _readingStyle == 'sequential',
+                                        onSelected: (selected) {
+                                          if (selected) {
+                                            setState(() => _readingStyle = 'sequential');
+                                          }
+                                        },
+                                      ),
+                                      optionChip(
+                                        label: 'Bible in a Year (OT + NT)',
+                                        selected: _readingStyle == 'bibleInYear',
+                                        onSelected: (selected) {
+                                          if (selected) {
+                                            setState(() => _readingStyle = 'bibleInYear');
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: Spacing.sm),
+                                  Text(
+                                    _readingStyle == 'sequential'
+                                        ? 'Read chapters in order from where you left'
+                                        : 'A balanced plan pairing Old Testament passages with New Testament verse ranges',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: AppColors.textSecondary),
+                                  ),
+                                  const SizedBox(height: Spacing.lg),
+                                  Text(
                                     'Target Completion',
                                     style: Theme.of(context)
                                         .textTheme
@@ -516,38 +594,20 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                                         ),
                                   ),
                                   const SizedBox(height: Spacing.md),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          'Complete by $endDateStr',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.copyWith(
-                                                color: AppColors.primary,
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                  Text(
+                                    'Complete by Dec 31 ($endDateStr)',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w600,
                                         ),
-                                      ),
-                                      FilledButton.tonal(
-                                        onPressed: _pickEndDate,
-                                        style: FilledButton.styleFrom(
-                                          backgroundColor: AppColors.planGradientStart,
-                                          foregroundColor: AppColors.textPrimary,
-                                          minimumSize: const Size(120, 48),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(24),
-                                          ),
-                                        ),
-                                        child: const Text('Choose Date'),
-                                      ),
-                                    ],
                                   ),
                                 ],
                               ),
                             ),
+
                           ],
                         ),
                 ),
