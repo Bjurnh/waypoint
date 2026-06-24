@@ -344,18 +344,24 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                           optionChip(
                             label: 'Start New Plan',
                             selected: _planMode == 'start',
-                            onSelected: (selected) {
+onSelected: (selected) {
                               if (selected) {
-                                setState(() => _planMode = 'start');
+                                setState(() {
+                                  _planMode = 'start';
+                                  _readingStyle = 'bibleInYear';
+                                });
                               }
                             },
                           ),
                           optionChip(
                             label: 'Continue From Current Reading',
                             selected: _planMode == 'continue',
-                            onSelected: (selected) {
+onSelected: (selected) {
                               if (selected) {
-                                setState(() => _planMode = 'continue');
+                                setState(() {
+                                  _planMode = 'continue';
+                                  _readingStyle = 'sequential';
+                                });
                               }
                             },
                           ),
@@ -447,7 +453,7 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                                           }
                                         },
                                       ),
-                                      optionChip(
+optionChip(
                                         label: 'Bible in a Year (OT + NT)',
                                         selected: _readingStyle == 'bibleInYear',
                                         onSelected: (selected) {
@@ -563,10 +569,10 @@ class PlanGenerationScreenState extends State<PlanGenerationScreen> {
                                       ),
                                       optionChip(
                                         label: 'Bible in a Year (OT + NT)',
-                                        selected: _readingStyle == 'bibleInYear',
+                                        selected: _readingStyle == 'mixed',
                                         onSelected: (selected) {
                                           if (selected) {
-                                            setState(() => _readingStyle = 'bibleInYear');
+                                            setState(() => _readingStyle = 'mixed');
                                           }
                                         },
                                       ),

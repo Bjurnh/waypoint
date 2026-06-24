@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/prayer_entry.dart';
@@ -216,6 +217,22 @@ class _PrayerLogScreenState extends State<PrayerLogScreen> {
                                       color: AppColors.mutedForeground,
                                     ),
                                   ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Started: ${DateFormat('MMM d, yyyy').format(p.dateAdded)}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.mutedForeground,
+                                    ),
+                                  ),
+                                  if (p.isAnswered)
+                                    Text(
+                                      'Answered: ${p.answeredDate != null ? DateFormat('MMM d, yyyy').format(p.answeredDate!) : ''}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.mutedForeground,
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),

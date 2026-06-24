@@ -53,6 +53,528 @@ class AppState extends ChangeNotifier {
   final HiveService _hive = HiveService();
 
   // ------------------------------------------------------------------
+  // Continue-from-current plan generation (Bible-in-a-Year)
+  // ------------------------------------------------------------------
+
+  List<DayReading> generateContinueFromCurrentPlan({
+    required plan_models.PlanConfig config,
+    required DateTime startDate,
+  }) {
+    final lastBook = config.lastBook?.trim();
+    final lastChapter = config.lastChapter;
+    if (lastBook == null || lastBook.isEmpty || lastChapter == null) {
+      return <DayReading>[];
+    }
+
+    // Mixed OT + NT reading style.
+    if (config.readingStyle == 'mixed') {
+      // NT always starts from Matthew 1.
+      const otBookOrder = <String>[
+        'Genesis',
+        'Exodus',
+        'Leviticus',
+        'Numbers',
+        'Deuteronomy',
+        'Joshua',
+        'Judges',
+        'Ruth',
+        '1 Samuel',
+        '2 Samuel',
+        '1 Kings',
+        '2 Kings',
+        '1 Chronicles',
+        '2 Chronicles',
+        'Ezra',
+        'Nehemiah',
+        'Esther',
+        'Job',
+        'Psalms',
+        'Proverbs',
+        'Ecclesiastes',
+        'Song of Solomon',
+        'Isaiah',
+        'Jeremiah',
+        'Lamentations',
+        'Ezekiel',
+        'Daniel',
+        'Hosea',
+        'Joel',
+        'Amos',
+        'Obadiah',
+        'Jonah',
+        'Micah',
+        'Nahum',
+        'Habakkuk',
+        'Zephaniah',
+        'Haggai',
+        'Zechariah',
+        'Malachi',
+      ];
+
+      const ntBookOrder = <String>[
+        'Matthew',
+        'Mark',
+        'Luke',
+        'John',
+        'Acts',
+        'Romans',
+        '1 Corinthians',
+        '2 Corinthians',
+        'Galatians',
+        'Ephesians',
+        'Philippians',
+        'Colossians',
+        '1 Thessalonians',
+        '2 Thessalonians',
+        '1 Timothy',
+        '2 Timothy',
+        'Titus',
+        'Philemon',
+        'Hebrews',
+        'James',
+        '1 Peter',
+        '2 Peter',
+        '1 John',
+        '2 John',
+        '3 John',
+        'Jude',
+        'Revelation',
+      ];
+
+      const chapterCounts = <String, int>{
+        // OT
+        'Genesis': 50,
+        'Exodus': 40,
+        'Leviticus': 27,
+        'Numbers': 36,
+        'Deuteronomy': 34,
+        'Joshua': 24,
+        'Judges': 21,
+        'Ruth': 4,
+        '1 Samuel': 31,
+        '2 Samuel': 24,
+        '1 Kings': 22,
+        '2 Kings': 25,
+        '1 Chronicles': 29,
+        '2 Chronicles': 36,
+        'Ezra': 10,
+        'Nehemiah': 13,
+        'Esther': 10,
+        'Job': 42,
+        'Psalms': 150,
+        'Proverbs': 31,
+        'Ecclesiastes': 12,
+        'Song of Solomon': 8,
+        'Isaiah': 66,
+        'Jeremiah': 52,
+        'Lamentations': 5,
+        'Ezekiel': 48,
+        'Daniel': 12,
+        'Hosea': 14,
+        'Joel': 3,
+        'Amos': 9,
+        'Obadiah': 1,
+        'Jonah': 4,
+        'Micah': 7,
+        'Nahum': 3,
+        'Habakkuk': 3,
+        'Zephaniah': 3,
+        'Haggai': 2,
+        'Zechariah': 14,
+        'Malachi': 4,
+        // NT
+        'Matthew': 28,
+        'Mark': 16,
+        'Luke': 24,
+        'John': 21,
+        'Acts': 28,
+        'Romans': 16,
+        '1 Corinthians': 16,
+        '2 Corinthians': 13,
+        'Galatians': 6,
+        'Ephesians': 6,
+        'Philippians': 4,
+        'Colossians': 4,
+        '1 Thessalonians': 5,
+        '2 Thessalonians': 3,
+        '1 Timothy': 6,
+        '2 Timothy': 4,
+        'Titus': 3,
+        'Philemon': 1,
+        'Hebrews': 13,
+        'James': 5,
+        '1 Peter': 5,
+        '2 Peter': 3,
+        '1 John': 5,
+        '2 John': 1,
+        '3 John': 1,
+        'Jude': 1,
+        'Revelation': 22,
+      };
+
+      int clampChapter(int ch, int max) {
+        if (ch < 1) return 1;
+        if (ch > max) return max;
+        return ch;
+      }
+
+      final int totalDays = config.timeFrame;
+      if (totalDays <= 0) return <DayReading>[];
+
+      // 1) Build OT remaining chapters list.
+      final normalizedLastBook = lastBook.toLowerCase();
+      final lastOtBookIndex = otBookOrder.indexWhere((b) => b.toLowerCase() == normalizedLastBook);
+      final int otStartBookIndex = lastOtBookIndex == -1 ? 0 : lastOtBookIndex;
+      final int otLastBookMax = chapterCounts[otBookOrder[otStartBookIndex]] ?? 0;
+      final int rawOtFromChapter = lastOtBookIndex == -1 ? 1 : clampChapter(lastChapter + 1, otLastBookMax);
+
+      final bool lastBookWasKnown = lastOtBookIndex != -1;
+      final int effectiveOtFromBookIndex =
+          !lastBookWasKnown ? otStartBookIndex : (rawOtFromChapter > otLastBookMax ? otStartBookIndex + 1 : otStartBookIndex);
+      final int effectiveOtFromChapter =
+          (!lastBookWasKnown || effectiveOtFromBookIndex > otStartBookIndex) ? 1 : rawOtFromChapter;
+
+      final otRemaining = <String>[];
+      for (int bi = effectiveOtFromBookIndex; bi < otBookOrder.length; bi++) {
+        final book = otBookOrder[bi];
+        final totalCh = chapterCounts[book] ?? 0;
+        if (totalCh <= 0) continue;
+
+        final int startCh = (bi == effectiveOtFromBookIndex) ? effectiveOtFromChapter : 1;
+        if (startCh > totalCh) continue;
+
+        for (int ch = startCh; ch <= totalCh; ch++) {
+          otRemaining.add('$book $ch');
+        }
+      }
+
+      // Edge: lastBook="Malachi" lastChapter=4 => OT list empty.
+      // The logic above naturally yields an empty list in that case.
+
+      // 2) Build NT remaining chapters list: always from Matthew 1.
+      final ntRemaining = <String>[];
+      for (int bi = 0; bi < ntBookOrder.length; bi++) {
+        final book = ntBookOrder[bi];
+        final totalCh = chapterCounts[book] ?? 0;
+        if (totalCh <= 0) continue;
+        final int startCh = (bi == 0) ? 1 : 1;
+        for (int ch = startCh; ch <= totalCh; ch++) {
+          ntRemaining.add('$book $ch');
+        }
+      }
+
+      // Auto-calculate how many OT/NT chapters per day are needed to finish
+      // within the available timeframe.
+      final int daysAvailable = config.timeFrame;
+
+      // OT gets 2/3 of daily reading, NT gets 1/3.
+      final int otChaptersPerDay =
+          ((otRemaining.length / daysAvailable) * 1).ceil().clamp(1, 10);
+      final int ntChaptersPerDay =
+          ((ntRemaining.length / daysAvailable) * 1).ceil().clamp(1, 5);
+
+      debugPrint('Plan (mixed): ${otRemaining.length} OT, ${ntRemaining.length} NT, '
+          '$daysAvailable days, $otChaptersPerDay OT/$ntChaptersPerDay NT per day');
+
+      // 3-5) Group into days, combining lists.
+
+      final prevByDate = {
+        for (final r in readings)
+          DateTime(r.date.year, r.date.month, r.date.day): r,
+      };
+
+      final result = <DayReading>[];
+      int dayIndex = 0;
+      int otIndex = 0;
+      int ntIndex = 0;
+
+      while (dayIndex < totalDays && (otIndex < otRemaining.length || ntIndex < ntRemaining.length)) {
+        final dayChapters = <String>[];
+
+        for (int i = 0; i < otChaptersPerDay && otIndex < otRemaining.length; i++) {
+          dayChapters.add(otRemaining[otIndex]);
+          otIndex++;
+        }
+
+        for (int i = 0; i < ntChaptersPerDay && ntIndex < ntRemaining.length; i++) {
+          dayChapters.add(ntRemaining[ntIndex]);
+          ntIndex++;
+        }
+
+        // If one testament is exhausted, the remaining days should get only the other.
+        // (This is already satisfied by only pulling while the index is in-range.)
+
+        final date = DateTime(startDate.year, startDate.month, startDate.day)
+            .add(Duration(days: dayIndex));
+        final prev = prevByDate[DateTime(date.year, date.month, date.day)];
+
+        result.add(DayReading(
+          id: 'reading_$dayIndex',
+          date: date,
+          chapters: dayChapters,
+          completed: prev?.completed ?? false,
+          completionDate: prev?.completionDate,
+        ));
+
+        dayIndex++;
+      }
+
+      return result;
+    }
+
+    // ------------------------------------------------------------------
+    // Default existing sequential logic (unchanged)
+    // ------------------------------------------------------------------
+
+    // Hardcoded canonical book order (66 books) + chapter counts.
+    const bookOrder = <String>[
+      // OT
+      'Genesis',
+      'Exodus',
+      'Leviticus',
+      'Numbers',
+      'Deuteronomy',
+      'Joshua',
+      'Judges',
+      'Ruth',
+      '1 Samuel',
+      '2 Samuel',
+      '1 Kings',
+      '2 Kings',
+      '1 Chronicles',
+      '2 Chronicles',
+      'Ezra',
+      'Nehemiah',
+      'Esther',
+      'Job',
+      'Psalms',
+      'Proverbs',
+      'Ecclesiastes',
+      'Song of Solomon',
+      'Isaiah',
+      'Jeremiah',
+      'Lamentations',
+      'Ezekiel',
+      'Daniel',
+      'Hosea',
+      'Joel',
+      'Amos',
+      'Obadiah',
+      'Jonah',
+      'Micah',
+      'Nahum',
+      'Habakkuk',
+      'Zephaniah',
+      'Haggai',
+      'Zechariah',
+      'Malachi',
+      // NT
+      'Matthew',
+      'Mark',
+      'Luke',
+      'John',
+      'Acts',
+      'Romans',
+      '1 Corinthians',
+      '2 Corinthians',
+      'Galatians',
+      'Ephesians',
+      'Philippians',
+      'Colossians',
+      '1 Thessalonians',
+      '2 Thessalonians',
+      '1 Timothy',
+      '2 Timothy',
+      'Titus',
+      'Philemon',
+      'Hebrews',
+      'James',
+      '1 Peter',
+      '2 Peter',
+      '1 John',
+      '2 John',
+      '3 John',
+      'Jude',
+      'Revelation',
+    ];
+
+    const chapterCounts = <String, int>{
+      // OT
+      'Genesis': 50,
+      'Exodus': 40,
+      'Leviticus': 27,
+      'Numbers': 36,
+      'Deuteronomy': 34,
+      'Joshua': 24,
+      'Judges': 21,
+      'Ruth': 4,
+      '1 Samuel': 31,
+      '2 Samuel': 24,
+      '1 Kings': 22,
+      '2 Kings': 25,
+      '1 Chronicles': 29,
+      '2 Chronicles': 36,
+      'Ezra': 10,
+      'Nehemiah': 13,
+      'Esther': 10,
+      'Job': 42,
+      'Psalms': 150,
+      'Proverbs': 31,
+      'Ecclesiastes': 12,
+      'Song of Solomon': 8,
+      'Isaiah': 66,
+      'Jeremiah': 52,
+      'Lamentations': 5,
+      'Ezekiel': 48,
+      'Daniel': 12,
+      'Hosea': 14,
+      'Joel': 3,
+      'Amos': 9,
+      'Obadiah': 1,
+      'Jonah': 4,
+      'Micah': 7,
+      'Nahum': 3,
+      'Habakkuk': 3,
+      'Zephaniah': 3,
+      'Haggai': 2,
+      'Zechariah': 14,
+      'Malachi': 4,
+      // NT
+      'Matthew': 28,
+      'Mark': 16,
+      'Luke': 24,
+      'John': 21,
+      'Acts': 28,
+      'Romans': 16,
+      '1 Corinthians': 16,
+      '2 Corinthians': 13,
+      'Galatians': 6,
+      'Ephesians': 6,
+      'Philippians': 4,
+      'Colossians': 4,
+      '1 Thessalonians': 5,
+      '2 Thessalonians': 3,
+      '1 Timothy': 6,
+      '2 Timothy': 4,
+      'Titus': 3,
+      'Philemon': 1,
+      'Hebrews': 13,
+      'James': 5,
+      '1 Peter': 5,
+      '2 Peter': 3,
+      '1 John': 5,
+      '2 John': 1,
+      '3 John': 1,
+      'Jude': 1,
+      'Revelation': 22,
+    };
+
+    int clampChapter(int ch, int max) {
+      if (ch < 1) return 1;
+      if (ch > max) return max;
+      return ch;
+    }
+
+    final normalizedLastBook = lastBook.toLowerCase();
+    final lastBookIndex = bookOrder.indexWhere((b) => b.toLowerCase() == normalizedLastBook);
+
+    // 1) Find starting position: next chapter in lastBook, not re-reading lastChapter.
+    // If lastBook is the final OT book (Malachi 4), the next chapter should flow into NT (Matthew 1).
+    final fromBookIndex = (lastBookIndex == -1) ? 0 : lastBookIndex;
+    final lastBookMax = chapterCounts[bookOrder[fromBookIndex]] ?? 0;
+
+    final rawFromChapter = lastBookIndex == -1 ? 1 : clampChapter(lastChapter + 1, lastBookMax);
+    final effectiveFromBookIndex =
+        lastBookIndex == -1 ? fromBookIndex : (rawFromChapter > lastBookMax ? fromBookIndex + 1 : fromBookIndex);
+    final effectiveFromChapter =
+        (lastBookIndex == -1 || effectiveFromBookIndex > fromBookIndex) ? 1 : rawFromChapter;
+
+    // ISSUE 2: If we're already at the very end of the Bible (Revelation 22),
+    // return no remaining chapters.
+    if (lastBookIndex != -1 &&
+        bookOrder[lastBookIndex].toLowerCase() == 'revelation' &&
+        lastChapter == (chapterCounts['Revelation'] ?? 22)) {
+      return <DayReading>[];
+    }
+
+    // 2) Build flat list of remaining chapters from that position.
+    final remaining = <Map<String, int>>[];
+    for (int bi = effectiveFromBookIndex; bi < bookOrder.length; bi++) {
+      final book = bookOrder[bi];
+      final totalCh = chapterCounts[book] ?? 0;
+      if (totalCh <= 0) continue;
+
+      // If we're starting at the last chapter of the effective book,
+      // "next chapter" must move to the next book.
+      if (bi == effectiveFromBookIndex && effectiveFromChapter >= totalCh) {
+        continue;
+      }
+
+      final startCh = (bi == effectiveFromBookIndex) ? effectiveFromChapter : 1;
+      for (int ch = startCh; ch <= totalCh; ch++) {
+        remaining.add({'book': bi, 'chapter': ch});
+      }
+    }
+
+    if (remaining.isEmpty) {
+      return <DayReading>[];
+    }
+
+    // Map bi back to book name for display.
+    String bookNameFromIndex(int bi) => bookOrder[bi];
+
+    // 3) Group into days: each day gets exactly chaptersPerDay.
+    // NOTE: PlanConfig doesn't currently expose chaptersPerDay; we derive it
+    // so the plan always finishes exactly within the available timeframe.
+    final totalChaptersRemaining = remaining.length;
+    final daysAvailable = config.timeFrame;
+    final chaptersPerDay = (totalChaptersRemaining / daysAvailable).ceil();
+
+    debugPrint('Plan: $totalChaptersRemaining chapters, '
+        '$daysAvailable days, $chaptersPerDay per day');
+
+
+    final totalDays = config.timeFrame;
+    if (totalDays <= 0) return <DayReading>[];
+
+    final prevByDate = {
+      for (final r in readings)
+        DateTime(r.date.year, r.date.month, r.date.day): r,
+    };
+
+    final dayCount = (remaining.length / chaptersPerDay).ceil();
+    final cappedDayCount = dayCount > totalDays ? totalDays : dayCount;
+
+    // 4) Map each group into DayReading objects.
+    final result = <DayReading>[];
+    for (int dayIndex = 0; dayIndex < cappedDayCount; dayIndex++) {
+      final start = dayIndex * chaptersPerDay;
+      final end = (start + chaptersPerDay).clamp(0, remaining.length);
+      final dayChapters = <String>[];
+      for (int i = start; i < end; i++) {
+        final bi = remaining[i]['book']!;
+        final ch = remaining[i]['chapter']!;
+        dayChapters.add('${bookNameFromIndex(bi)} $ch');
+      }
+
+      final date = DateTime(startDate.year, startDate.month, startDate.day)
+          .add(Duration(days: dayIndex));
+      final prev = prevByDate[DateTime(date.year, date.month, date.day)];
+
+      result.add(DayReading(
+        id: 'reading_$dayIndex',
+        date: date,
+        chapters: dayChapters,
+        completed: prev?.completed ?? false,
+        completionDate: prev?.completionDate,
+      ));
+    }
+
+    // 5) If remaining chapters are empty, still return empty list.
+    return result;
+  }
+
+  // ------------------------------------------------------------------
   // Profile (local-only for now)
   // ------------------------------------------------------------------
   String? displayName;
@@ -362,56 +884,12 @@ class AppState extends ChangeNotifier {
 
   /// Generates a new reading plan based on the provided configuration.
   Future<void> generatePlan(plan_models.PlanConfig config) async {
+    final planStartDate = config.startDate;
+
     if (config.readingStyle == 'bibleInYear') {
-      final planStartDate = config.startDate;
-
-      final fullPlan = createBibleInYearPlan(startDate: planStartDate);
-
-
-      if (config.mode == plan_models.PlanMode.continueCurrent &&
-          config.lastBook != null &&
-          config.lastChapter != null) {
-        // Continue for Bible-in-a-Year must preserve the OT+NT pairing.
-        // We generate the full mixed plan and then slice from the day that
-        // contains the user’s last read position.
-        // TODO: continue position for Bible-in-a-Year should preserve OT+NT pairing.
-        // Start from the user-provided current reading position.
-        final startDayIndex = _findBibleInYearStartDayIndex(
-          fullPlan,
-          lastBook: config.lastBook!,
-          lastChapter: config.lastChapter!,
-          lastVerse: config.lastVerse,
-        );
-
-        final skipped = fullPlan.skip(startDayIndex).toList();
-        var updated = skipped
-            .asMap()
-            .entries
-            .map(
-              (e) => DayReading(
-                id: 'reading_${e.key}',
-                date: DateTime(
-                  planStartDate.year,
-                  planStartDate.month,
-                  planStartDate.day,
-                ).add(Duration(days: e.key)),
-                chapters: e.value.chapters,
-                completed: false,
-              ),
-            )
-            .toList();
-
-        // Ensure length matches the generator’s requested timeframe.
-        // Note: truncate the sliced `updated`, not the previous `readings`.
-        if (updated.length > config.timeFrame) {
-          updated = updated.sublist(0, config.timeFrame);
-        }
-
-        readings = updated;
-
-      } else {
-        readings = fullPlan;
-      }
+      // existing bibleInYear logic - start new plan only
+      // do NOT route continueCurrent here anymore
+      readings = createBibleInYearPlan(startDate: planStartDate);
 
       generatedPlanConfig = plan_models.PlanConfig(
         // timeFrame is derived from the PlanConfig passed from the generator,
@@ -433,22 +911,74 @@ class AppState extends ChangeNotifier {
         startDate: planStartDate,
         style: config.readingStyle,
       );
+
+    } else if (config.readingStyle == 'mixed' &&
+        config.mode == plan_models.PlanMode.continueCurrent) {
+      // mixed OT+NT continue mode
+      readings = generateContinueFromCurrentPlan(
+        config: config,
+        startDate: planStartDate,
+      );
+
+      generatedPlanConfig = plan_models.PlanConfig(
+        timeFrame: config.timeFrame,
+        startDate: planStartDate,
+        dailyMinutes: config.dailyMinutes,
+        readingStyle: config.readingStyle,
+        mode: config.mode,
+        lastBook: config.lastBook,
+        lastChapter: config.lastChapter,
+        lastVerse: config.lastVerse,
+        targetType: config.targetType,
+        targetEndDate: config.targetEndDate,
+      );
+
+      this.config = PlanConfig(
+        length: config.timeFrame,
+        startDate: planStartDate,
+        style: config.readingStyle,
+      );
+
+    } else if (config.readingStyle == 'sequential' &&
+        config.mode == plan_models.PlanMode.continueCurrent) {
+      // sequential continue mode
+      readings = generateContinueFromCurrentPlan(
+        config: config,
+        startDate: planStartDate,
+      );
+
+      generatedPlanConfig = plan_models.PlanConfig(
+        timeFrame: config.timeFrame,
+        startDate: planStartDate,
+        dailyMinutes: config.dailyMinutes,
+        readingStyle: config.readingStyle,
+        mode: config.mode,
+        lastBook: config.lastBook,
+        lastChapter: config.lastChapter,
+        lastVerse: config.lastVerse,
+        targetType: config.targetType,
+        targetEndDate: config.targetEndDate,
+      );
+
+      this.config = PlanConfig(
+        length: config.timeFrame,
+        startDate: planStartDate,
+        style: config.readingStyle,
+      );
+
     } else {
+      // default: sequential start new plan
+      final chapters = _getBibleChapters(config.readingStyle);
+      readings = _buildReadings(chapters, config.timeFrame, planStartDate);
 
       generatedPlanConfig = config;
 
       // Convert to storage model
       this.config = PlanConfig(
         length: config.timeFrame,
-        startDate: config.startDate,
+        startDate: planStartDate,
         style: config.readingStyle,
       );
-
-      final chapters = config.mode == plan_models.PlanMode.continueCurrent
-          ? _getRemainingBibleChapters(config)
-          : _getBibleChapters(config.readingStyle);
-
-      readings = _buildReadings(chapters, config.timeFrame, config.startDate);
     }
 
     await saveReadings();
@@ -485,6 +1015,14 @@ class AppState extends ChangeNotifier {
     // Conservative fallback: start from day 0.
     var best = 0;
 
+    // Track the last day that matched the OT chapter. This prevents
+    // erroneously falling back to day 0 when the match exists but the loop
+    // doesn't "break" due to precision logic.
+    //
+    // Only used when verse precision isn't provided (common for saved state
+    // where lastVerse is null).
+    var lastOtMatchIndexPlusOne = -1;
+
     for (int i = 0; i < fullPlan.length; i++) {
       final day = fullPlan[i];
       final chapters = day.chapters;
@@ -496,28 +1034,53 @@ class AppState extends ChangeNotifier {
       final otMatches = _labelContainsBookChapter(otLabel, needleBook, lastChapter);
       final ntMatches = _labelContainsBookChapter(ntLabel, needleBook, lastChapter);
 
-      if (!otMatches && !ntMatches) continue;
-
-      // If verse was provided, try to ensure we match the NT range precisely.
-      // OT labels don't have verses.
-      if (lastVerse == null || lastVerse <= 0) {
-        best = i + 1; // start after the day that contains the last read position
-        break;
+      if (lastVerse != null && lastVerse > 0) {
+        // With verse precision: only consider a candidate day if the NT
+        // chapter matches. OT-only chapter matches are ignored unless the
+        // verse also lands inside the NT range.
+        if (!ntMatches) continue;
+      } else {
+        // Without verse precision: require at least one of OT or NT match.
+        if (!otMatches && !ntMatches) continue;
       }
 
-      final verseMatches =
-          _labelContainsBookChapterVerse(ntLabel, needleBook, lastChapter, lastVerse);
+      // Remember OT chapter matches for non-verse mode.
+      if (lastVerse == null || lastVerse <= 0) {
+        if (otMatches) {
+          lastOtMatchIndexPlusOne = i + 1;
+        }
 
-      if (otMatches) {
-        // Last position seems to be in OT, so just advance by one day.
+        // No verse precision: any OT or NT chapter match means the last
+        // read position is within this mixed day.
         best = i + 1;
         break;
       }
+
+      final verseMatches = _labelContainsBookChapterVerse(
+        ntLabel,
+        needleBook,
+        lastChapter,
+        lastVerse,
+      );
 
       if (verseMatches) {
+        // Last read point is in the NT range for this day.
         best = i + 1;
         break;
       }
+
+      // If we have verse precision and we didn't match NT range by verse,
+      // allow OT chapter match to advance.
+      if (otMatches) {
+        best = i + 1;
+        break;
+      }
+    }
+
+    // If we never advanced (still 0) but we did find at least one OT match in
+    // non-verse mode, fall back to the last matching day instead of day 0.
+    if ((lastVerse == null || lastVerse <= 0) && best == 0 && lastOtMatchIndexPlusOne > 0) {
+      best = lastOtMatchIndexPlusOne;
     }
 
     if (best < 0) best = 0;
@@ -525,32 +1088,36 @@ class AppState extends ChangeNotifier {
     return best;
   }
 
+
   bool _labelContainsBookChapter(String label, String needleBook, int needleChapter) {
-    // Normalize separators.
     final l = label.trim().toLowerCase();
 
-    // Match patterns like "Isaiah 40" or "John 3".
-    // Also works when labels include ranges: "Isaiah 40 - Isaiah 41".
-    // We'll do a simple token/number scan.
-    // Example: tokens: [isaiah, 40, -, isaiah, 41]
-    final parts = l
-        .replaceAll(':', ' ')
-        .replaceAll('-', ' - ')
-        .split(RegExp(r'\s+'))
-        .where((p) => p.isNotEmpty)
-        .toList();
+    // OT label formats from _formatOtLabel():
+    // 1) "Ezra 3" / "Ezra 3-9"
+    // 2) "Genesis 49 - Ezra 1"
+    // 3) "Ezra 7 - Nehemiah 1"
+    // So we extract book/chapter pairs using regex and check any pair matches.
+    //
+    // We accept:
+    // - optional spaces around dashes
+    // - optional chapter ranges: "book 3-9"
+    // - mixed-book dash: "bookA chA - bookB chB"
+    //
+    // Regex captures: book name (non-digits), chapter (digits)
+    final re = RegExp(r'(?<book>[^0-9:]+?)\s*(?<chapter>\d+)\b');
 
-    for (int i = 0; i < parts.length - 1; i++) {
-      final p = parts[i];
-      final next = parts[i + 1];
-      if (p == needleBook) {
-        final ch = int.tryParse(next);
-        if (ch == needleChapter) return true;
+    for (final m in re.allMatches(l)) {
+      final book = (m.namedGroup('book') ?? '').trim();
+      final ch = int.tryParse(m.namedGroup('chapter') ?? '');
+      if (book.isEmpty || ch == null) continue;
+      if (book == needleBook && ch == needleChapter) {
+        return true;
       }
     }
 
     return false;
   }
+
 
   bool _labelContainsBookChapterVerse(
     String label,
